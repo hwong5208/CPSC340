@@ -21,7 +21,7 @@ function grad1(x)
 	n = length(x);
 	g = zeros(n);
 	for i in 1:n
-		# Put gradient code here
+		g[i] = 3x[i]^2;
 	end
 	return g
 end
@@ -31,8 +31,10 @@ func2(x) = prod(x)
 
 function grad2(x)
 	n = length(x);
-	g = zeros(n);
-	# Put gradient code here
+	g = ones(n);
+	for i in 1:n
+		g[i] = prod(x[1:end .!=i]);
+	end
 	return g
 end
 
@@ -40,7 +42,12 @@ end
 func3(x) = -sum(log(1 + exp(-x)))
 
 function grad3(x)
-	# Put gradient code here	
+	n = length(x);
+	g = zeros(n);
+	for i in 1:n
+		g[i] = 1 / (exp(x[i]) + 1);
+	end
+	return g
 end
 
 ### A function to compute the derivative numerically
