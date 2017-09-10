@@ -12,7 +12,7 @@ end
 
 function func3(n)
 	x = ones(n,1);
-	return x + 100; 
+	return x + 100;
 end
 
 function func4(n)
