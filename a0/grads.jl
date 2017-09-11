@@ -31,7 +31,7 @@ func2(x) = prod(x)
 
 function grad2(x)
 	n = length(x);
-	g = ones(n);
+	g = zeros(n);
 	for i in 1:n
 		g[i] = prod(x[1:end .!=i]);
 	end
