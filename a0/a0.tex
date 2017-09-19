@@ -1,0 +1,243 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{listings} % For displaying code
+
+% Answers
+\def\ans#1{\\\gre{Answer: #1}}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+% Math
+\def\R{\mathbb{R}}
+\def\argmax{\mathop{\rm arg\,max}}
+\def\argmin{\mathop{\rm arg\,min}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\alignStar}[1]{\begin{align*}#1\end{align*}}
+
+% LaTeX
+\newcommand{\fig}[2]{\includegraphics[width=#1\textwidth]{a0f/#2}}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{#2}\end{center}}
+\def\items#1{\begin{itemize}#1\end{itemize}}
+\def\enum#1{\begin{enumerate}#1\end{enumerate}}
+
+
+
+\begin{document}
+
+
+
+\title{CPSC 340 Assignment 0 Solutions}
+% \author{Warm-up}
+\date{}
+\maketitle
+\vspace{-4em}
+
+\textit{***Collaborated with Zack Wong on this assignment***}
+\section{Linear Algebra Review}
+
+\subsection{Basic Operations}
+
+\enum{
+\item 14
+\item 0
+\item $\left[\begin{array}{c}
+6\\
+10\\
+14\\
+\end{array}\right]$
+\item $\sqrt{5}$
+\item $\left[0, 1, 2\right]$
+\item $
+\left[\begin{array}{ccc}
+	3 & 1 & 1\\
+	2 & 3 & 1\\
+	2 & 1 & 3
+\end{array}\right]$
+\item $\left[\begin{array}{c}
+6\\
+5\\
+7\\	
+\end{array}\right]$
+}
+
+\subsection{Matrix Algebra Rule}
+
+\begin{enumerate}
+\item True
+\item True
+\item True
+\item False
+\item False
+\item True
+\item False
+\item True
+\item True
+\end{enumerate}
+
+\subsection{Special Matrices}
+
+\enum{
+\item Symmetric matrix: a matrix that is equal to its transposed matrix
+\item Identity matrix: a square matrix that has 1 for all the diagonal entries and 0 for the rest of the entries
+\item Orthogonal matrix: a matrix the transpose of which is equal to its inverse
+}
+
+
+
+\section{Probability Review}
+
+
+
+\subsection{Rules of probability}
+
+\begin{enumerate}
+\item $\frac{1}{4}$
+\item \$4
+\item 0.55
+\end{enumerate}
+
+
+\subsection{Bayes Rule and Conditional Probability}
+
+\begin{enumerate}
+\item 0.010094
+\item True positive because $P(T=1|D=1)$ and $(T=0|D=0)$ have high probabilities
+\item 0.009411531
+\item No, $P(D=1|T=1)$ should be higher if the tests are true positive.
+\item $P(T=1|D=1)$ needs to be higher (the test should be more accurate)
+\end{enumerate}
+
+\subsection{Bayes Rule and Independence}
+
+\textit{***Sources used: https://en.wikipedia.org/wiki/Monty\_Hall\_problem}
+
+There are 3 possibilities:
+\begin{enumerate}
+	\item $PEE$
+	\item $EPE$
+	\item $EEP$\\
+\end{enumerate}
+
+\quad *$P$ = Prize, $E$ = Empty\\
+
+Given that we choose door 1,
+\begin{itemize}
+	\item If case 1 is true, then switching is disadvantageous, and not switching advantageous
+	\item If case 2 is true, then switching is advantageous, and not switching disadvantageous
+	\item If case 3 is true, then switching is advantageous, and not switching disadvantageous
+\end{itemize}
+
+Each case has the possibility of $\frac{1}{3}$ of occuring, so there is a $\frac{2}{3}$ chance that switching is advantageous vs. $\frac{1}{3}$ that not switching is advantageous. So, the contestant should b) switch to door 2.
+
+\section{Calculus Review}
+
+\subsection{One-variable derivatives}
+
+\begin{enumerate}
+\item $\frac{14}{3}$
+\item $\frac{1}{4}$
+\item 0
+\item $-\frac{1}{e^x+1}$
+\end{enumerate}
+
+
+\subsection{Multi-variable derivatives}
+
+\begin{enumerate}
+% \item $f_1(x) = \sin(x)$
+\item $\langle2x_1,e^{x_2}\rangle$.
+\item $\langle e^{x_1+x_2x_3}, x_3e^{x_1+x_2x_3}, x_2e^{x_1+x_2x_3}\rangle$.
+\item $\vec{a}$.
+\item $\langle4x_1-2x_2, 2x_2-2x_1\rangle$.
+\item $\vec{x}$.
+\end{enumerate}
+
+Hint: it is helpful to write out the linear algebra expressions in terms of summations.
+
+
+
+\subsection{Derivatives of code}
+
+\begin{enumerate}
+\item
+	\begin{verbatim}
+		function grad1(x)
+        	n = length(x);
+        	g = zeros(n);
+        	for i in 1:n
+                g[i] = 3x[i]^2;
+        	end
+        	return g
+		end
+	\end{verbatim}
+\item
+	\begin{verbatim}
+		function grad2(x)
+        	n = length(x);
+        	g = ones(n);
+        	for i in 1:n
+                g[i] = prod(x[1:end .!=i]);
+        	end
+        	return g
+		end
+	\end{verbatim}
+\item
+	\begin{verbatim}
+		function grad3(x)
+        	n = length(x);
+        	g = zeros(n);
+        	for i in 1:n
+                g[i] = 1 / (exp(x[i]) + 1);
+        	end
+        	return g
+		end
+	\end{verbatim}
+\end{enumerate}
+
+
+\section{Algorithms and Data Structures Review}
+
+\subsection{Trees}
+
+Assuming the depth of a single-node binary tree has a depth of 0:
+\begin{enumerate}
+\item $2^l$
+\item $2^l-1$
+\end{enumerate}
+
+\subsection{Common Runtimes}
+
+\begin{enumerate}
+\item $O(nlgn)$
+\item $O(n)$
+\item $O(n)$ (worst case: list contains all 0's, i.e. have to check every element to see if it's 0)
+\item $O(nd)$
+\item $O(z)$
+\end{enumerate}
+
+\subsection{Running times of code}
+
+Assuming \texttt{ones(n, 1)} and \texttt{zeros(n, 1)} are in $O(n)$:
+\begin{enumerate}
+	\item \texttt{func1} $\in O(n)$
+	\item \texttt{func2} $\in O(1)$
+	\item \texttt{func3} $\in O(n)$
+	\item \texttt{func4} $\in O(n^2)$
+\end{enumerate}
+\end{document}
