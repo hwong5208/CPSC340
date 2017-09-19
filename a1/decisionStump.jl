@@ -74,8 +74,10 @@ function decisionStumpEquality(X,y)
 	function predict(Xhat)
 		(t,d) = size(Xhat)
 		yes = split(Xhat)
-		yhat = fill(splitNo,t)
-		yhat[yes] = splitYes
+		yhat = fill(splitYes,t)
+		if any(.!yes)
+			yhat[.!yes] = splitNo
+		end
 		return yhat
 	end
 
