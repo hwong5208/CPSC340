@@ -1,10 +1,26 @@
 include("misc.jl") # Includes GenericModel typedef
 
+# Q5.1.1
 function knn_predict(Xhat,X,y,k)
-  (n,d) = size(X)
-  (t,d) = size(Xhat)
-  k = min(n,k) # To save you some debuggin
-  return fill(1,t)
+    (n,d) = size(X)
+    (t,d) = size(Xhat)
+    k = min(n,k) # To save you some debuggin
+
+    D = zeros(t, n)
+    yhat = zeros(t)
+
+    for i in 1:t
+        for j in 1:n
+            D[i, j] = sqrt(sum((Xhat[i,:] .- X[j,:]).^2))
+        end
+    end
+
+    for i in 1:t
+        rank = sortperm(D[i,:])
+        yhat[i] = mode(y[rank[1:k]])
+    end
+
+    return yhat
 end
 
 function knn(X,y,k)

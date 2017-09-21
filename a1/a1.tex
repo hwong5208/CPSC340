@@ -155,14 +155,15 @@ Legend:
 \end{figure}
 
 
-
 \subsection{Validation Set}
 
 If we split the dataset in half and use the first half for training and second half for validation, the minimum validation set error we were able to obtain was 0.165 at depth 4 with a 0.110 train error, but after depth 4 the validation set error stays the same. If we switch the data sets and use the second half for training and first half for validation, the minimum validation error becomes 0.155 at depth 4 with a 0.105 training error. To use more of our data to estimate depth, we could use cross validation so every object is used for validation once.
 
 \section{Naive Bayes}
 
-In this section we'll implement naive Bayes, a very fast classification method that is often surprisingly accurate for text data with simple representations like bag of words.
+In this section we'll implement naive Bayes, a very fast classif
+
+ication method that is often surprisingly accurate for text data with simple representations like bag of words.
 
 
 
@@ -233,49 +234,30 @@ You can implement the training phase of a naive Bayes classifier in this setup i
 
 \section{K-Nearest Neighbours}
 
-
-In \emph{citiesSmall} dataset, nearby points tend to receive the same class label because they are part of the same state. This indicates that a $k-$nearest neighbours classifier might be a better choice than a decision tree (while naive Bayes would probably work really badly on this dataset). The file \emph{knn.jl} has implemented the training function for a $k-$nearest neighbour classifier (which is to just memorize the data) but the predict function always just predicts 1.
-
-
 \subsection{KNN Prediction}
 
-Fill in the \emph{predict} function in \emph{knn.jl} so that the model file implements the k-nearest neighbour prediction rule. You should use Euclidean distance, and  you may find it useful to pre-compute all the distances and then use the ``sortperm'' command.
-\blu{
 \enum{
-\item Hand in the predict function. 
-\item Report  the training and test error obtained on the \emph{citiesSmall.mat} dataset for $k=1$, $k=3$, and $k=10$. (You can use \emph{example\_knn.jl} to get started.)
-\item Hand in the plot generatied by {classifier2Dplot} on the \emph{citiesSmall.mat} dataset for $k=1$ on the training data. (Note that this version of the function also plots the test data.)
-\item Why is the training error $0$ for $k=1$?
-\item If you didn't have an explicit test set, how would you choose $k$?
-}}
-
+	\item See code in \texttt{knn.jl}
+	\item $x(k, Etrain, Etest) = (1, 0.000, 0.286), (3, 0.028, 0.286), (10, 0.072, 0.286)$
+	\item See Figure 2 below
+	\item This is because the there is only one nearest neighbour and the nearest neighbour of any point in \texttt{Xhat} is always itself as \texttt{Xhat} is equal to \texttt{X} when calculating the training error. This means the predicted label is always the same as the actual label, meaning the training error = 0.
+	\item Use cross validation to choose the best $k$. Using the \texttt{citiesSmall} dataset a fold of 5 would probably make sense.
+} 
+\begin{figure}[h!]
+  \includegraphics[height=7.5cm]{knn_train_data_k=1.png}
+  \caption{KNN Training Data on k=1}
+  \label{fig: knn}
+\end{figure}
 
 \subsection{Condensed Nearest Neighbours}
 
-The file \emph{citiesBig1.mat} contains a version of this dataset with more than 30 times as many cities. KNN can obtain a lower test error if it's trained on this dataset, but the prediction time will be very slow. A common strategy for applying KNN to huge datasets is called \emph{condensed nearest neighbours}, and the main idea is to only store a \emph{subset} of the training examples (and to only compare to these examples when making predictions). A simple variation of this algorithm would be:
-
-\begin{algorithm}[H]
- initialize subset with first training example\;
- \For{each  training example}{
-  \eIf{the example is incorrectly classified by the KNN classifier using the current subset}{
-   add the current example to the subset\;
-   }{
-   do \emph{not} add the current example to the subset (do nothing)\;
-  }
- }
- \caption{Condensed Nearest Neighbours}
-\end{algorithm}
-You are provided with an implementation of this \emph{condensed nearest neighbours} algorithm in \emph{knn.jl}. 
-\blu{
 \enum{
-\item The point of this algorithm is to be faster than KNN. Try running the condensed nearest neighbours (called ``cknn'' in the code) on the \emph{citiesBig1} dataset and report how long it takes to make a prediction. What about if you try to use KNN for this dataset?
-\item Report the training and testing errors for condensed NN, as well as the number of variables in the subset, on the \emph{citiesBig1} dataset with $k=1$.
-\item Why is the training error with $k=1$ now greater than $0$?
-\item If you have $s$ examples in the subset, what is the cost of running the predict function on $t$ test examples in terms of $n$, $d$, $t$, and $s$?
-\item Try out your function on the dataset \emph{citiesBig2}. Why are the  test error \emph{and} training error so high (even for $k=1$) for this method on this dataset?
+	\item After training \texttt{cknn} on \texttt{X} of \texttt{citiesBig1}, running \texttt{predict} on \texttt{Xtest} of \texttt{citiesBig1} with $k = 1$ took 4.136411572 seconds. Running the same data using \texttt{knn} with the same $k$ took 140.647040979 seconds.
+	\item Size of the subset = 4047, $Etrain$ = 0.307228, $Etest$ = 0.496030
+	\item This is because an object in the training data set might not be in the model anymore, so the nearest neighbour of an object might not always be itself, meaning the predicted label might not always match the actual label.
+	\item We need to calculate the distance between each object in \texttt{Xhat} and each object in \texttt{Xsub}, so we need to calculate $ts$ distances in total. Each distance is calculated from $d$ dimensions, so the total cost is $O(tsd)$.
+	\item $(k, Etrain, Etest) = (1, 0.138, 0.210), (3, 0.285, 0.227), (10, 0.571, 0.512)$. The high training the test errors may be due to the fact that a lot of the objects that are close to each other actually have different labels, so using knn in this case may not be reliable.
 }
-}
-
 
 \section{Very-Short Answer Questions}
 
