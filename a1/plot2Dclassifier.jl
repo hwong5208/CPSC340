@@ -35,3 +35,20 @@ function plot2Dclassifier(X,y,model)
 
 	contourf(xValues,yValues,zValues,cmap=cmap)
 end
+
+function plot2Dscatter(X,y)
+
+	increment = 100
+
+	figure()
+	plot(X[y.==1,1],X[y.==1,2],"b+")
+	plot(X[y.==2,1],X[y.==2,2],"ro")
+
+	(xmin,xmax) = xlim()
+	xDomain = linspace(xmin,xmax,increment)
+	(ymin,ymax) = ylim()
+	yDomain = linspace(ymin,ymax,increment)
+
+	xValues = repmat(xDomain,1,length(xDomain))
+	yValues = repmat(yDomain',length(yDomain),1)
+end

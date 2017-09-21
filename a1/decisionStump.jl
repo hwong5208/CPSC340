@@ -84,6 +84,7 @@ function decisionStumpEquality(X,y)
 	return StumpModel(predict,split,isempty(splitNo))
 end
 
+# Q2.2
 function decisionStump(X,y)
 	# Get the size of the data matrix
 	(n,d) = size(X)
@@ -135,7 +136,7 @@ function decisionStump(X,y)
 		if isempty(splitVariable)
 			return fill(true,t)
 		else
-			return (Xhat[:,splitVariable] .== splitValue)
+			return (Xhat[:,splitVariable] .> splitValue)
 		end
 	end
 

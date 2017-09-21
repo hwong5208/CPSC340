@@ -101,68 +101,64 @@ Consider the figure below, which plots a set of two-dimensional training example
 
 \section{Decision Trees}
 
-If you run the file \emph{example\_decisionStump.jl}, it will load a dataset containing longtitude and latitude data for 400 cities in the US, along with a class label indicating whether they were a ``red" state or a ``blue" state in the 2012 election.\footnote{The cities data was sampled from \url{http://simplemaps.com/static/demos/resources/us-cities/cities.csv}. The election information was collected from Wikipedia.} Specifically, the first column of the variable $X$ contains the longitude and the second variable contains the latitude, while the variable $y$ is set to $1$ for blue states and $2$ for red states. After it loads the data, it plots the data and then fits two simple classifiers: a classifier that always predicts the most common label ($1$ in this case) and a decision stump that discretizes the features (by rounding to the nearest integer) and then finds the best equality-based rule (i.e., check if a feature is \emph{equal} to some value). It reports the training error with these two classifiers, then plots the decision areas made by the decision stump.
-
-Note that these functions use the ``JLD'' package for loading the data and the ``PyPlot'' package to do the plotting. You can install these packages using:
-\begin{verbatim}
-Pkg.add("JLD")
-Pkg.add("PyPlot")
-\end{verbatim}
-
 \subsection{Equality vs. Inequality Splitting Rules}
 
-In class we discussed splitting rules based on inequalities rather than equalities. \blu{Is there a type of feature where it makes sense to use 
-an equality-based splitting rule?}
+It might make more sense when working with features with few, discrete values that are not related. For example, with 'colour' as a feature converted to numbers, inequalities wouldn't make a lot of sense as the numbers representing the colours are not related in quantity.
 
 \subsection{Decision Stump Implementation}
 
-The file \emph{decision\_stump.jl} contains a function  that finds the best decision stump using the equality rule (``decisionStumpEquality''), and then returns a function that can apply this decision stump to new data. Instead of discretizing the data and using a rule based on testing an equality for a single feature, we want to check whether a feature is above a threshold and split the data accordingly (this is the more sane approach, which we discussed in class). \blu{Add a new function ``decisionStump'' to \emph{decision\_stump.jl} that finds the best inequality-based rule, and report the updated error you obtain by using inequalities instead of discretizing and testing equality.}
-
-Hint: you may want to start by copy/pasting the contents of of the ``decisionStumpEquality'' function and then make modifications from there. Note that you should remove the calls to the ``round'' function for the inequality case.  Make sure that you maintain the same input/output format in your function, since otherwise subsequent questions will not work (it should produce a plot that divides the US into a northern blue and a southern red area).
-If you are new to Julia, you may also want to look at\emph{majorityPredictor.jl} to get an idea of the syntax in  a simpler case.
+Training Error of \texttt{decisionStump}: 0.25
 
 \subsection{Constructing Decision Trees}
-
-Once your \emph{decisionStump} function is finished, the script \emph{example\_decisionTree} will be able to fit a decision tree of depth 2 to the same dataset (which results in a lower training error). Look at how the decision tree is stored and how the (recursive) \emph{predict} function works. \blu{Using the same splits as the fitted depth-2 decision tree, write out what an alternate version of the predict function would be for classifying one training example as a simple program using if/else statements (as in slide 7 of L3).}
-
-Hint: you may find the ``@show'' macro really helpful.
+\begin{verbatim}
+if latitude > 37.669007
+    if longitude > -96.090109
+        return 1
+    else
+        return 2
+else
+    if longitude > -155.577574
+        return 2
+    else
+        return 1
+\end{verbatim}
 
 
 
 \subsection{Cost of Fitting Decision Trees}
 
-In class, we discussed how in general the decision stump minimizing the classification error can be found in $O(nd\log n)$ time. Using the greedy recursive splitting procedure, \blu{what is the total cost of fitting a decision tree of depth $m$ in terms of $n$, $d$, and $m$?} 
-
-Hint: even thought there could be $(2^m-1)$ decision stumps, keep in mind not every stump will need to go through every example. Note also that we stop growing the decision tree if a node has no examples, so we may not even need to do anything for many of the $(2^m-1)$ decision stumps.
-
+The first (top-level) decision stump takes $O(nd\log{n})$ time, and as we split, the second-level decision stumps each takes $O(nd\log{\frac{n}{a}})$ and $O(nd\log{\frac{n}{b}})$ time, where $\frac{n}{a} + \frac{n}{b} = n$. So the second layer takes $O(nd\log{n})$ time still. We apply the same reasoning to each layer, and we have a total of $m$ layers, so the total cost is $O(mnd\log{n})$ time.
 
 \section{Training and Testing}
 
-\subsection{Traning Error}
+\subsection{Training Error}
 
-Running \texttt{example\_train.jl} fits decision trees of different depths using two different implementations: first,
-our own implementation using your ``decisionStump'' function, and also using a variant using a more sophisticated splitting criterion called the information gain. \blu{Describe what you observe. Can you explain the results?}
+Initially, the training error of \texttt{decisionStump} decreases as the depth increases, but it stops decreasing after depth 4. On the other hand, the training error of infogain decreases with increasing depth all the way to zero.
 
-
+The error stops decreasing after a certain depth for the decision tree model likely because the splitting isn't even and sometimes the NO case has no more objects even when there are still objects of different labels in the same YES case. When this happens, we have reached the base split case and our implementation of \texttt{decisionTree} will split no further, meaning that some of the objects that end up in the same YES-leaf have different labels, which means some of them will be assigned labels different from the actual labels they have, which increases the training error regardless of what value is assigned to them.
 
 \subsection{Training and Testing Error Curves}
 
-Notice that the \emph{citiesSmall.mat} file also contains test data, ``Xtest" and ``ytest". 
-Running \emph{example\_trainTest} trains a depth-2 decision tree and evaluates its performance on the test data. %\footnote{The code uses the "information gain" splitting criterion; see the Decision Trees bonus slides for more information.} 
-With a depth-2 decision tree, the training and test error are fairly close, so the model hasn't overfit much.
+\textit{
+Legend:
+\begin{itemize}
+	\item blue crosses are training errors
+	\item red dots are test errors
+	\item x-axis represents the depth
+	\item y-axis represents the error
+\end{itemize}}
 
-
-\blu{Make a plot that contains the training error and testing error as you vary the depth from 1 through 15. How do each of these errors change with the decision tree depth?}
-
-Note: use the provided infomax-based decision tree code from the previous subsection.
+\begin{figure}[h!]
+  \includegraphics[height=7.5cm]{Etrain_Etest_vs_depth.png}
+  \caption{Training Error and Test Error vs. Depth}
+  \label{fig: error vs depth}
+\end{figure}
 
 
 
 \subsection{Validation Set}
 
-Suppose we're in the typical case where we don't have the labels for the test data. In this case, we might instead use a \emph{validation} set. Split the training set into two equal-sized parts: use the first $n/2$ examples as a training set and the second $n/2$ examples as a validation set (we're assuming that the examples are already in a random order). \blu{What depth of decision tree would we pick if we minimized the validation set error? Does the answer change if you switch the training and validation set? How could we use more of our data to  estimate the depth more reliably?}
-
-
+If we split the dataset in half and use the first half for training and second half for validation, the minimum validation set error we were able to obtain was 0.165 at depth 4 with a 0.110 train error, but after depth 4 the validation set error stays the same. If we switch the data sets and use the second half for training and first half for validation, the minimum validation error becomes 0.155 at depth 4 with a 0.105 training error. To use more of our data to estimate depth, we could use cross validation so every object is used for validation once.
 
 \section{Naive Bayes}
 
