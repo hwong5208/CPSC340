@@ -1,12 +1,12 @@
 include("misc.jl") # Includes GenericModel typedef
 
 function naiveBayes(X,y)
-	# Implementation of naive Bayes classifier for binary features
+  # Implementation of naive Bayes classifier for binary features
 
-	(n,d) = size(X)
+  (n,d) = size(X)
 
   # Compute number of classes, assuming y in {1,2,...,k}
-  k = maximum(y)
+  k = maximum(y) 
 
   # We will store p(y(i) = c) in p_y(c)
   counts = zeros(k)
@@ -17,9 +17,66 @@ function naiveBayes(X,y)
 
   # We will store p(x(i,j) = 1 | y(i) = c) in p_xy(1,j,c)
   # We will store p(x(i,j) = 0 | y(i) = c) in p_xy(2,j,c)
-  p_xy = (1/2)ones(2,d,k)
+#   p_xy = (1/2)ones(2,d,k)
+  
+   p_xy = zeros(2,d,k)
 
-  function predict(Xhat)
+# 4.3 NaiveBayes Implementation
+function cal_p_xy(X,c,j)
+  (n,d)=size(X)
+   count1 = 0;
+   countx = 0
+   Xj = X[:,j]
+  for a in 1:n
+
+  if(y[a]==c)
+    countx = countx+1
+    if (Xj[a]==0)
+      count1+=1
+      end
+    end
+   end
+ 
+
+   return count1/countx
+ end
+
+# 4.3 NaiveBayes Implementation
+function cal_p_xy2(X,c,j)
+  (n,d)=size(X)
+   count1 = 0;
+   countx = 0
+   Xj = X[:,j]
+  for a in 1:n
+
+  if(y[a]==c)
+    countx = countx+1
+    if (Xj[a]==1)
+      count1+=1
+      end
+    end
+   end
+
+
+   return count1/countx
+ end
+
+
+  for c in 1:k
+     for j in 1:d
+     p_xy[1,j,c] = cal_p_xy2(X,c,j)
+     p_xy[2,j,c] =  cal_p_xy(X,c,j)
+
+     
+   end   
+
+   end
+ 
+
+ 
+
+
+   function predict(Xhat)
     (t,d) = size(Xhat)
     yhat = zeros(t)
 
@@ -42,5 +99,6 @@ function naiveBayes(X,y)
     return yhat
   end
 
-	return GenericModel(predict)
+
+  return GenericModel(predict)
 end

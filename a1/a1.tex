@@ -82,6 +82,7 @@ median(X) = 1.1589999999999998
 
 mode(X) = 0.77
 
+For giving a meaning (continuous) data, we have round that number
 
 \end{verbatim}
 
@@ -269,10 +270,11 @@ If you run the script \emph{example\_bagOfWods.jl}, it will load the following d
 }
 
 \begin{enumerate}
+\red{
 \item  $"league"$
 \item  $"aids","engine","problem","system"$
 \item $"rec.*"$
-
+}
 
 \end{enumerate}
 
@@ -282,6 +284,8 @@ If you run the script \emph{example\_bagOfWods.jl}, it will load the following d
 If you run the function \emph{example\_decisionTree\_newsgroups.jl} it will load the newsgroups dataset and report the test error for decision trees of different sizes (it may take a while for the deeper trees, as this is a sub-optimal implementation). On other other hand, if you run the function \emph{example\_naiveBayes.jl} it will fit the basic naive Bayes model and report the test error.
 
 While the \emph{predict} function of the naive Bayes classifier is already implemented, the calculation of the variable $p\_xy$ is incorrect (right now, it just sets all values to $1/2$). \blu{Modify this function so that \emph{p\_xy} correctly computes the conditional probabilities of these values based on the frequencies in the data set. Hand in your code and report the test error that you obtain.}
+
+
 
 
 \subsection{Runtime of Naive Bayes for Discrete Data}
@@ -295,7 +299,7 @@ Assume you have the following setup:
 }
 You can implement the training phase of a naive Bayes classifier in this setup in $O(nd)$, since you only need to do a constant amount of work for each $X(i,j)$ value. (You do not have to actually implement it in this way for the previous question, but you should think about how this could be done). \blu{What is the cost of classifying $t$ test examples with the model?}
 
-
+The cost of classify is O(tdk). Because the dominant cost is computing p(Xij | Yi). And we can have it with three for loops. Loop over the example t, and loop over the features d, and loop over the class labels k .
 
 
 \section{K-Nearest Neighbours}
@@ -342,13 +346,21 @@ You can implement the training phase of a naive Bayes classifier in this setup i
 \item For any parametric model, how does increasing number of training examples $n$ affect the two parts of the fundamental trade-off.
 }
 
+
+
 \begin{enumerate}
-\item  catterplot could provide a brief idea of that data 
-\item  Because the training and test set might come from same distribution, and there might have some relationship between them
-\item Validation set is the part of our training data to approximate test error. Test set is provide the true error , and we cannot access it.
-
-
-   
+\red{
+\item  Scatterplot could provide a brief idea of that data 
+\item  If the training set is not chosen randomly, it is not IID. 
+\item Validation set is the part of our training data to approximate test error. Test set is to provide the true error , and we cannot access it.
+\item Naive Bayes classifier assumes that the presence of a particular feature in a class is unrelated to the presence of any other feature.
+\item the feature of data is not independ. For example, the data is included postal codes ,addresses, cities. 
+\item Nonparametric models make weaker assumptions than parametric models. This means that the results are more general and less dependent on assumptions that are likely to be incorrect. Non-parametric mode could bulid more complicated model.
+\item It will affect the accuracy, because it change the data 's distinace. 
+\item It will not affect the training and prediction. In the traing phrase, KNN just store all the data in model. And laos because K is a constant, typically, it is much smaller than n and d. Therefore, it will not affect.
+\item Training error increase as k increased .The approximation error would decreased
+\item For large N, the training error would increase and approzimation error would decrease. Because the model would be come more general.
+}
 
 
 \end{enumerate}
