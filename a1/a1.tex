@@ -70,6 +70,21 @@ X = real(dataTable[2:end,:])
 \end{verbatim}
 Also, Julia has no mode command so I've included a mode function in `misc.jl'.
 
+\begin{verbatim}
+
+minimum(X) =  0.352
+
+maximum(X) = 4.862
+
+mean(X) = 1.3246249999999997
+
+median(X) = 1.1589999999999998
+
+mode(X) = 0.77
+
+
+\end{verbatim}
+
 
 \subsection{Data Visualization}
 
@@ -93,13 +108,27 @@ plot(1:52,X[:,1]) # Plot the first row
 \end{verbatim}
 To generate similar-looking plots you can use the functions `plot', `boxplot', `plt[:hist]', and `scatter'.
 
+\begin{enumerate}
+\item C
+\item B
+\item F
+\item D
+\item E
+\item A
+\end{enumerate}
+
 
 \subsection{Decision Surfaces}
 
 Consider the figure below, which plots a set of two-dimensional training examples and the decision surface produced by a ``neural network'' classifier (a model we'll see later in the course).
 \blu{How many training examples has the neural network mis-classified?} (This figure is best viewed in colour.)
 
+\begin{enumerate}
+\item 16
+\end{enumerate}
+
 \section{Decision Trees}
+
 
 \subsection{Equality vs. Inequality Splitting Rules}
 
@@ -184,6 +213,13 @@ Suppose you believe that a naive Bayes model would be appropriate for this datas
 \item $p(y = 0)$.
 }
 
+
+\begin{enumerate}
+\item  $\frac{6}{10}$
+\item  $\frac{4}{10}$
+
+\end{enumerate}
+
 \blu{(b) Compute the estimates of the 4 conditional probabilities required by naive Bayes for this example}  (you don't need to show any work):
 \items{
 \item $p(x_1 = 1 | y = 1)$.
@@ -192,7 +228,28 @@ Suppose you believe that a naive Bayes model would be appropriate for this datas
 \item $p(x_2 = 0 | y = 0)$.
 }
 
+\begin{enumerate}
+\item  $\frac{1}{2}$
+\item  $\frac{1}{3}$
+\item  $1$
+\item  $\frac{3}{4}$
+
+\end{enumerate}
+
 \blu{(c) Under the naive Bayes model and your estimates of the above probabilities, what is the most likely label for the test example? (Show your work.)}
+
+
+
+$p( y = 1 |  x_1 = 1 , x_2 = 0 ) \propto p(  x_1 = 1  | y = 1 ) p(  x_2 = 0  | y = 1 ) p( y =1)$.
+        \newline =$ (\frac{1}{2}) (\frac{1}{3})(\frac{6}{10}) $
+               \newline = $0.1$
+\newline  
+$p( y = 0 |  x_1 = 1 , x_2 = 0 ) \propto p(  x_1 = 1  | y = 0 ) p(  x_2 = 0  | y = 0 ) p( y =0)$.
+        \newline =$ (1) (\frac{3}{4})(\frac{4}{10}) $
+               \newline = $0.3$
+\newline 
+Since the $p( y = 0 |  x_1 = 1 , x_2 = 0 ) $ is bigger , the most likely label is 0.
+
 
 \subsection{Bag of Words}
 
@@ -210,6 +267,15 @@ If you run the script \emph{example\_bagOfWods.jl}, it will load the following d
 \item Which words are present in training example 500?
 \item Which newsgroup name does training example 500 come from?
 }
+
+\begin{enumerate}
+\item  $"league"$
+\item  $"aids","engine","problem","system"$
+\item $"rec.*"$
+
+
+\end{enumerate}
+
 
 \subsection{Naive Bayes Implementation}
 
@@ -275,5 +341,17 @@ You can implement the training phase of a naive Bayes classifier in this setup i
 \item How does increase the parameter $k$ in $k$-nearest neighbours affect the two parts (training error and approximation error) of the fundamental trade-off (hint: think of the extreme values).
 \item For any parametric model, how does increasing number of training examples $n$ affect the two parts of the fundamental trade-off.
 }
+
+\begin{enumerate}
+\item  catterplot could provide a brief idea of that data 
+\item  Because the training and test set might come from same distribution, and there might have some relationship between them
+\item Validation set is the part of our training data to approximate test error. Test set is provide the true error , and we cannot access it.
+
+
+   
+
+
+\end{enumerate}
+
 
 \end{document}
