@@ -1,14 +1,14 @@
 # Load X and y variable
 using JLD
-X = load("citiesSmall.jld","X")
-y = load("citiesSmall.jld","y")
-Xtest = load("citiesSmall.jld","Xtest")
-ytest = load("citiesSmall.jld","ytest")
+X = load("citiesBig2.jld","X")
+y = load("citiesBig2.jld","y")
+Xtest = load("citiesBig2.jld","Xtest")
+ytest = load("citiesBig2.jld","ytest")
 
 # Fit a KNN classifier
-k = 10
+k = 3
 include("knn.jl")
-model = knn(X,y,k)
+model = cknn(X,y,k)
 
 # Evaluate training error
 yhat = model.predict(X)
@@ -17,7 +17,7 @@ trainError = mean(yhat .!= y)
 
 # Evaluate test error
 yhat = model.predict(Xtest)
-trainError = mean(yhat .!= ytest)
+testError = mean(yhat .!= ytest)
 @printf("Test Error with %d-nearest neighbours: %.3f\n",k,testError)
 
 include("plot2Dclassifier.jl")

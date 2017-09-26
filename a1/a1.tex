@@ -147,7 +147,7 @@ if latitude > 37.669007
     else
         return 2
 else
-    if longitude > -155.577574
+    if longitude > -115.577574
         return 2
     else
         return 1
@@ -323,10 +323,10 @@ The cost of classify is O(tdk). Because the dominant cost is computing p(Xij | Y
 
 \enum{
 	\item After training \texttt{cknn} on \texttt{X} of \texttt{citiesBig1}, running \texttt{predict} on \texttt{Xtest} of \texttt{citiesBig1} with $k = 1$ took 4.136411572 seconds. Running the same data using \texttt{knn} with the same $k$ took 140.647040979 seconds.
-	\item Size of the subset = 4047, $Etrain$ = 0.307228, $Etest$ = 0.496030
+	\item Size of the subset = 457, $Etrain$ = 0.008, $Etest$ = 0.018
 	\item This is because an object in the training data set might not be in the model anymore, so the nearest neighbour of an object might not always be itself, meaning the predicted label might not always match the actual label.
 	\item We need to calculate the distance between each object in \texttt{Xhat} and each object in \texttt{Xsub}, so we need to calculate $ts$ distances in total. Each distance is calculated from $d$ dimensions, so the total cost is $O(tsd)$.
-	\item $(k, Etrain, Etest) = (1, 0.138, 0.210), (3, 0.285, 0.227), (10, 0.571, 0.512)$. The high training the test errors may be due to the fact that a lot of the objects that are close to each other actually have different labels, so using knn in this case may not be reliable.
+    \item $(k, Etrain, Etest) = (1, 0.138, 0.210), (3, 0.285, 0.227), (10, 0.571, 0.512)$. The high training the test errors may be due to the fact that a lot of the objects that are close to each other actually have different labels, so using knn in this case may not be reliable. //TODO
 }
 
 \section{Very-Short Answer Questions}
