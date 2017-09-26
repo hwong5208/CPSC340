@@ -6,7 +6,7 @@ function naiveBayes(X,y)
   (n,d) = size(X)
 
   # Compute number of classes, assuming y in {1,2,...,k}
-  k = maximum(y) 
+  k = maximum(y)
 
   # We will store p(y(i) = c) in p_y(c)
   counts = zeros(k)
@@ -17,66 +17,36 @@ function naiveBayes(X,y)
 
   # We will store p(x(i,j) = 1 | y(i) = c) in p_xy(1,j,c)
   # We will store p(x(i,j) = 0 | y(i) = c) in p_xy(2,j,c)
-#   p_xy = (1/2)ones(2,d,k)
-  
+
    p_xy = zeros(2,d,k)
 
-# 4.3 NaiveBayes Implementation
-function cal_p_xy(X,c,j)
-  (n,d)=size(X)
-   count1 = 0;
-   countx = 0
-   Xj = X[:,j]
-  for a in 1:n
+  function cal_p_xy(X, j, c, xval)
+    (n,d) = size(X)
+    match = 0;
+    total = 0
+    Xj = X[:,j]
+    for a in 1:n
 
-  if(y[a]==c)
-    countx = countx+1
-    if (Xj[a]==0)
-      count1+=1
+      if (y[a] == c)
+        total += 1
+        if (Xj[a] == xval)
+          match += 1
+        end
       end
+
     end
-   end
- 
 
-   return count1/countx
- end
-
-# 4.3 NaiveBayes Implementation
-function cal_p_xy2(X,c,j)
-  (n,d)=size(X)
-   count1 = 0;
-   countx = 0
-   Xj = X[:,j]
-  for a in 1:n
-
-  if(y[a]==c)
-    countx = countx+1
-    if (Xj[a]==1)
-      count1+=1
-      end
-    end
-   end
-
-
-   return count1/countx
- end
-
+    return (total == 0) ? 0 : match / total
+  end
 
   for c in 1:k
-     for j in 1:d
-     p_xy[1,j,c] = cal_p_xy2(X,c,j)
-     p_xy[2,j,c] =  cal_p_xy(X,c,j)
+    for j in 1:d
+      p_xy[1,j,c] = cal_p_xy(X,j,c,1)
+      p_xy[2,j,c] = cal_p_xy(X,j,c,0)
+    end
+  end
 
-     
-   end   
-
-   end
- 
-
- 
-
-
-   function predict(Xhat)
+  function predict(Xhat)
     (t,d) = size(Xhat)
     yhat = zeros(t)
 
@@ -93,12 +63,11 @@ function cal_p_xy2(X,c,j)
             p_yx[c] *= p_xy[2,j,c]
           end
         end
-      (~,yhat[i]) = findmax(p_yx)
+        (~,yhat[i]) = findmax(p_yx)
       end
     end
     return yhat
   end
-
 
   return GenericModel(predict)
 end

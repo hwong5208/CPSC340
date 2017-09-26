@@ -48,6 +48,13 @@
 \maketitle
 \vspace{-4em}
 
+
+Name: Hang Yee Wong\\
+CS ID: r9i0b 
+
+Name: Joanne Chen\\
+CS ID: r0a9
+
 The assignment instructions are the same as Assignment 0, except you have the option to work in a group of 2. If you work in a group, please only hand in \emph{one} assignment. It is recommended that you work in groups as the assignment is quite long, but please only submit one assignment for the group and make sure that everyone's name/ID is on the front page.
 
 
@@ -82,9 +89,10 @@ median(X) = 1.1589999999999998
 
 mode(X) = 0.77
 
-For giving a meaning (continuous) data, we have round that number
-
 \end{verbatim}
+
+The mode isn't very reliable because a lot of these data points have the same integer values but different decimal values. To give a meaningful mode, we can make the data discrete by rounding the data points.
+
 
 
 \subsection{Data Visualization}
@@ -124,9 +132,7 @@ To generate similar-looking plots you can use the functions `plot', `boxplot', `
 Consider the figure below, which plots a set of two-dimensional training examples and the decision surface produced by a ``neural network'' classifier (a model we'll see later in the course).
 \blu{How many training examples has the neural network mis-classified?} (This figure is best viewed in colour.)
 
-\begin{enumerate}
-\item 16
-\end{enumerate}
+There are 9 green crosses on the side classified to be blue and 8 blue circles on the green side, so a total of 17 examples were mis-classified.
 
 \section{Decision Trees}
 
@@ -191,9 +197,7 @@ If we split the dataset in half and use the first half for training and second h
 
 \section{Naive Bayes}
 
-In this section we'll implement naive Bayes, a very fast classif
-
-ication method that is often surprisingly accurate for text data with simple representations like bag of words.
+In this section we'll implement naive Bayes, a very fast classification method that is often surprisingly accurate for text data with simple representations like bag of words.
 
 
 
@@ -272,7 +276,7 @@ If you run the script \emph{example\_bagOfWods.jl}, it will load the following d
 \begin{enumerate}
 \red{
 \item  $"league"$
-\item  $"aids","engine","problem","system"$
+\item  $"car", "engine", "evidence", "problem", "system"$
 \item $"rec.*"$
 }
 
@@ -350,16 +354,16 @@ The cost of classify is O(tdk). Because the dominant cost is computing p(Xij | Y
 
 \begin{enumerate}
 \red{
-\item  Scatterplot could provide a brief idea of that data 
-\item  If the training set is not chosen randomly, it is not IID. 
-\item Validation set is the part of our training data to approximate test error. Test set is to provide the true error , and we cannot access it.
+\item  Scatterplot could provide a brief idea of that data. For example, it could help us choose a better k in knn and a better depth in decision trees.
+\item  If a data set is not chosen randomly, it is not IID. For example, some data points might be sampled much closer in time than other data points.
+\item Validation set is a part of our training data used to approximate test error. Test set is for evaluation of the model and to provide the true test error, and we cannot access it during training.
 \item Naive Bayes classifier assumes that the presence of a particular feature in a class is unrelated to the presence of any other feature.
-\item the feature of data is not independ. For example, the data is included postal codes ,addresses, cities. 
-\item Nonparametric models make weaker assumptions than parametric models. This means that the results are more general and less dependent on assumptions that are likely to be incorrect. Non-parametric mode could bulid more complicated model.
-\item It will affect the accuracy, because it change the data 's distinace. 
-\item It will not affect the training and prediction. In the traing phrase, KNN just store all the data in model. And laos because K is a constant, typically, it is much smaller than n and d. Therefore, it will not affect.
-\item Training error increase as k increased .The approximation error would decreased
-\item For large N, the training error would increase and approzimation error would decrease. Because the model would be come more general.
+\item The features of data are not independent of each other. For example, in bag of words, words that represent postal codes, addresses, and cities have a higher chance of appearing together than other words.
+\item Non-parametric models don't grow with the size of the data set, so they tend to be a lot faster than parametric models when working with huge data sets.
+\item //TODO It will affect the accuracy, because it change the data 's distinace. 
+\item It will not affect the training and prediction. In the traing phrase, KNN always stores all the data in the model, regardless of what k is. In the prediction phase, KNN always computes all the distances between a point and all the other points, so k really only changes the runtime when we are taking the mode of the k nearest neighbours in the prediction phase, but because k is a constant and is typically much smaller than n and d, it will not affect the overall runtime asymptotically.
+\item Training error increases as k increases (training error is 0 when k = 1). The approximation error decreases with k up to a certain threshold, then starts increasing after the threshold as it starts to take outliers into account.
+\item For large n, the training error would increase and the approximation error would decrease because the model would become more general as n increases.
 }
 
 
