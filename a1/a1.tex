@@ -55,27 +55,10 @@ CS ID: r9i0b
 Name: Joanne Chen\\
 CS ID: r0a9
 
-The assignment instructions are the same as Assignment 0, except you have the option to work in a group of 2. If you work in a group, please only hand in \emph{one} assignment. It is recommended that you work in groups as the assignment is quite long, but please only submit one assignment for the group and make sure that everyone's name/ID is on the front page.
-
 
 \section{Summary Statistics and Data Visualization}
 
-Download and expand the file \emph{a1.zip}, which contains estimates of the influenza-like illness percentage over 52 weeks on 2005-06 by Google Flu Trends in a comma-separated values (CSV) file. You can open this with Excel or other spreadsheet programs; the first row gives the abbreviation of the region names for each column, and each row gives the estimate for a week.
-After you change to the a0 directory, you can load this data in Julia using:
-\begin{verbatim}
-dataTable = readcsv("fluTrends.csv")
-\end{verbatim}
-This creates an two-dimensional array of type ``Any''  populated with all the information in the CSV file.
-
 \subsection{Summary Statistics}
-
-\blu{Report the following statistics}: the minimum, maximum, mean, median, and mode of all values across the dataset. In light of thea above, \blu{is the mode a reliable estimate of the most ``common" value? Describe another way we could give a meaningful ``mode" measurement for this (continuous) data.}
-
-Hint: Since the first row of the CSV file is just the names of the columns, we can create a matrix $X$ containing the data stored as real numbers using:
-\begin{verbatim}
-X = real(dataTable[2:end,:])
-\end{verbatim}
-Also, Julia has no mode command so I've included a mode function in `misc.jl'.
 
 \begin{verbatim}
 
@@ -97,26 +80,6 @@ The mode isn't very reliable because a lot of these data points have the same in
 
 \subsection{Data Visualization}
 
-Consider the figure on the next page.
-The figure contains the following plots, in a shuffled order:
-\enum{
-\item A histogram showing the distribution of each the values in the matrix $X$.
-\item A boxplot grouping data by weeks, showing the distribution across regions for each week.
-\item A scatterplot between the two regions with highest correlation.
-\item A single histogram showing the distribution of \emph{each} column in $X$.
-\item A scatterplot between the two regions with lowest correlation.
-\item A plot containing the weeks on the $x$-axis and the percentages for each region on the $y$-axis.
-}
-\blu{Match the plots (labeled A-F) with the descriptions above (labeled 1-6), with an extremely brief (a few words is fine) explanation for each decision.}
-
-Hint: you can generate similar plots by adding the PyPlot package. To add this package use:
-\begin{verbatim}
-Pkg.add("PyPlot") # Do this once per computer
-using PyPlot # Do this once per session
-plot(1:52,X[:,1]) # Plot the first row
-\end{verbatim}
-To generate similar-looking plots you can use the functions `plot', `boxplot', `plt[:hist]', and `scatter'.
-
 \begin{enumerate}
 \item C
 \item B
@@ -129,9 +92,6 @@ To generate similar-looking plots you can use the functions `plot', `boxplot', `
 
 \subsection{Decision Surfaces}
 
-Consider the figure below, which plots a set of two-dimensional training examples and the decision surface produced by a ``neural network'' classifier (a model we'll see later in the course).
-\blu{How many training examples has the neural network mis-classified?} (This figure is best viewed in colour.)
-
 There are 9 green crosses on the side classified to be blue and 8 blue circles on the green side, so a total of 17 examples were mis-classified.
 
 \section{Decision Trees}
@@ -139,10 +99,10 @@ There are 9 green crosses on the side classified to be blue and 8 blue circles o
 
 \subsection{Equality vs. Inequality Splitting Rules}
 
-It might make more sense when working with features with few, discrete values that are not related. For example, with 'colour' as a feature converted to numbers, inequalities wouldn't make a lot of sense as the numbers representing the colours are not related in quantity.
+It might make more sense when working with features with few, discrete values that are not related. For example, with "colour" as a feature converted to numbers, inequalities wouldn't make a lot of sense as the numbers representing the colours are not related in quantity.
 
 \subsection{Decision Stump Implementation}
-
+See code in \texttt{decisionStump.jl}\\
 Training Error of \texttt{decisionStump}: 0.25
 
 \subsection{Constructing Decision Trees}
@@ -203,107 +163,51 @@ In this section we'll implement naive Bayes, a very fast classification method t
 
 \subsection{Naive Bayes by Hand}
 
-Consider the dataset below, which has $10$ training examples and $2$ features:
-\[
-X = \begin{bmatrix}0 & 1\\1 & 1\\ 0 & 0\\ 1 & 1\\ 1 & 1\\ 0 & 0\\  1 & 0\\  1 & 0\\  1 & 1\\  1 &0\end{bmatrix}, \quad y = \begin{bmatrix}1\\1\\1\\1\\1\\1\\0\\0\\0\\0\end{bmatrix}.
-\]
-Suppose you believe that a naive Bayes model would be appropriate for this dataset, and you want to classify the following test example:
-\[
-\hat{x} = \begin{bmatrix}1 & 0\end{bmatrix}.
-\]
-
-\blu{(a) Compute the estimates of the class prior probabilities} (you don't need to show any work):
-\items{
-\item$ p(y = 1)$.
-\item $p(y = 0)$.
-}
-
-
+(a)
 \begin{enumerate}
 \item  $\frac{6}{10}$
 \item  $\frac{4}{10}$
-
 \end{enumerate}
 
-\blu{(b) Compute the estimates of the 4 conditional probabilities required by naive Bayes for this example}  (you don't need to show any work):
-\items{
-\item $p(x_1 = 1 | y = 1)$.
-\item $p(x_2 = 0 | y = 1)$.
-\item $p(x_1 = 1 | y = 0)$.
-\item $p(x_2 = 0 | y = 0)$.
-}
-
+(b)
 \begin{enumerate}
 \item  $\frac{1}{2}$
 \item  $\frac{1}{3}$
 \item  $1$
 \item  $\frac{3}{4}$
-
 \end{enumerate}
 
-\blu{(c) Under the naive Bayes model and your estimates of the above probabilities, what is the most likely label for the test example? (Show your work.)}
-
-
-
-$p( y = 1 |  x_1 = 1 , x_2 = 0 ) \propto p(  x_1 = 1  | y = 1 ) p(  x_2 = 0  | y = 1 ) p( y =1)$.
-        \newline =$ (\frac{1}{2}) (\frac{1}{3})(\frac{6}{10}) $
-               \newline = $0.1$
-\newline  
-$p( y = 0 |  x_1 = 1 , x_2 = 0 ) \propto p(  x_1 = 1  | y = 0 ) p(  x_2 = 0  | y = 0 ) p( y =0)$.
+(c)\\
+$p( y = 1 |  x_1 = 1 , x_2 = 0 ) 
+    \\ \propto p(  x_1 = 1  | y = 1 ) p(  x_2 = 0  | y = 1 ) p( y =1)$.
+    \newline = $ (\frac{1}{2}) (\frac{1}{3})(\frac{6}{10}) $
+    \newline = $0.1$
+\\\\
+$p( y = 0 |  x_1 = 1 , x_2 = 0 ) 
+        \\\propto p(  x_1 = 1  | y = 0 ) p(  x_2 = 0  | y = 0 ) p( y =0)$.
         \newline =$ (1) (\frac{3}{4})(\frac{4}{10}) $
-               \newline = $0.3$
+        \newline = $0.3$
 \newline 
-Since the $p( y = 0 |  x_1 = 1 , x_2 = 0 ) $ is bigger , the most likely label is 0.
+\\Since the $p( y = 0 |  x_1 = 1 , x_2 = 0 ) $ is bigger , the most likely label is 0.
 
 
 \subsection{Bag of Words}
 
-If you run the script \emph{example\_bagOfWods.jl}, it will load the following dataset:
-\enum{
-\item $X$: A sparse binary matrix. Each row corresponds to a newsgroup post, and each column corresponds to whether a particular word was used in the post. A value of $1$ means that the word occured in the post.
-\item $wordlist$: The set of words that correspond to each column.
-\item $y$: A vector with values $1$ through $4$, with the value corresponding to the newsgroup that the post came from.
-\item $groupnames$: The names of the four newsgroups.
-\item $Xvalidate$ and $yvalidate$: the word lists and newsgroup labels for additional newsgroup posts.
-}
-\blu{Answer the following}:
-\enum{
-\item Which word is present in the newsgroup post if there is a $1$ in column 50 of X?
-\item Which words are present in training example 500?
-\item Which newsgroup name does training example 500 come from?
-}
-
 \begin{enumerate}
-\red{
 \item  $"league"$
 \item  $"car", "engine", "evidence", "problem", "system"$
 \item $"rec.*"$
-}
 
 \end{enumerate}
 
 
 \subsection{Naive Bayes Implementation}
 
-If you run the function \emph{example\_decisionTree\_newsgroups.jl} it will load the newsgroups dataset and report the test error for decision trees of different sizes (it may take a while for the deeper trees, as this is a sub-optimal implementation). On other other hand, if you run the function \emph{example\_naiveBayes.jl} it will fit the basic naive Bayes model and report the test error.
-
-While the \emph{predict} function of the naive Bayes classifier is already implemented, the calculation of the variable $p\_xy$ is incorrect (right now, it just sets all values to $1/2$). \blu{Modify this function so that \emph{p\_xy} correctly computes the conditional probabilities of these values based on the frequencies in the data set. Hand in your code and report the test error that you obtain.}
-
-
-
+See code in \texttt{naiveBayes.jl}
 
 \subsection{Runtime of Naive Bayes for Discrete Data}
 
-Assume you have the following setup:
-\items{
-\item The training set has $n$ objects each with $d$ features.
-\item The test set has $t$ objects with $d$ features.
-\item Each feature can have up to $c$ discrete values (you can assume $c \leq n$).
-\item There are $k$ class labels (you can assume $k \leq n$)
-}
-You can implement the training phase of a naive Bayes classifier in this setup in $O(nd)$, since you only need to do a constant amount of work for each $X(i,j)$ value. (You do not have to actually implement it in this way for the previous question, but you should think about how this could be done). \blu{What is the cost of classifying $t$ test examples with the model?}
-
-The cost of classify is O(tdk). Because the dominant cost is computing p(Xij | Yi). And we can have it with three for loops. Loop over the example t, and loop over the features d, and loop over the class labels k .
+The cost of classifying is $O(tdk)$. Because the dominant cost is computing $p(X_{ij} | Y_{i})$. And we have it with three for loops: loop over the examples $t$, and loop over the features $d$, and loop over the class labels $k$.
 
 
 \section{K-Nearest Neighbours}
@@ -335,25 +239,7 @@ The cost of classify is O(tdk). Because the dominant cost is computing p(Xij | Y
 
 \section{Very-Short Answer Questions}
 
-\blu{Write a short one or two sentence answer to each of the questions below}. Make sure your answer is clear and concise.
-
-\enum{
-\item What is one reason we would want to look at scatterplots of the data before doing supervised learning?
-\item What is a reason that the examples in a training and test set might not be IID?
-\item What is the difference between a validation set and a test set?
-\item Why is  naive Bayes called ``naive''?
-\item What is a situation where the naive Bayes assumption could lead to poor performance?
-\item What is the main advantage of non-parametric models?
-\item A standard pre-processing step is ``standardization'' of the features: for each column of $X$ we subtract its mean and divide by its variance. Would this pre-processing change the accuracy of a decision tree classifier? Would it change the accuracy of a KNN classifier?
-\item Does increasing $k$ in KNN affect the training or prediction asymptotic runtimes?
-\item How does increase the parameter $k$ in $k$-nearest neighbours affect the two parts (training error and approximation error) of the fundamental trade-off (hint: think of the extreme values).
-\item For any parametric model, how does increasing number of training examples $n$ affect the two parts of the fundamental trade-off.
-}
-
-
-
 \begin{enumerate}
-\red{
 \item  Scatterplot could provide a brief idea of that data. For example, it could help us choose a better k in knn and a better depth in decision trees.
 \item  If a data set is not chosen randomly, it is not IID. For example, some data points might be sampled much closer in time than other data points.
 \item Validation set is a part of our training data used to approximate test error. Test set is for evaluation of the model and to provide the true test error, and we cannot access it during training.
@@ -364,9 +250,6 @@ The cost of classify is O(tdk). Because the dominant cost is computing p(Xij | Y
 \item It will not affect the training and prediction. In the traing phrase, KNN always stores all the data in the model, regardless of what k is. In the prediction phase, KNN always computes all the distances between a point and all the other points, so k really only changes the runtime when we are taking the mode of the k nearest neighbours in the prediction phase, but because k is a constant and is typically much smaller than n and d, it will not affect the overall runtime asymptotically.
 \item Training error increases as k increases (training error is 0 when k = 1). The approximation error decreases with k up to a certain threshold, then starts increasing after the threshold as it starts to take outliers into account.
 \item For large n, the training error would increase and the approximation error would decrease because the model would become more general as n increases.
-}
-
-
 \end{enumerate}
 
 

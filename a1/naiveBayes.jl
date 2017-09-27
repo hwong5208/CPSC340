@@ -20,6 +20,7 @@ function naiveBayes(X,y)
 
    p_xy = zeros(2,d,k)
 
+  # Q4.3
   function cal_p_xy(X, j, c, xval)
     (n,d) = size(X)
     match = 0;
