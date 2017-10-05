@@ -50,7 +50,7 @@
 
 
 Name: Hang Yee Wong\\
-CS ID: r9i0b 
+CS ID: r9i0b
 
 Name: Joanne Chen\\
 CS ID: r0a9
@@ -102,7 +102,79 @@ There are 9 green crosses on the side classified to be blue and 8 blue circles o
 It might make more sense when working with features with few, discrete values that are not related. For example, with "colour" as a feature converted to numbers, inequalities wouldn't make a lot of sense as the numbers representing the colours are not related in quantity.
 
 \subsection{Decision Stump Implementation}
-See code in \texttt{decisionStump.jl}\\
+\begin{verbatim}
+function decisionStump(X,y)
+    # Get the size of the data matrix
+    (n,d) = size(X)
+
+    # Initial the best rule with the baseline rule (no split)
+    y_mode = mode(y)
+    minError = sum(y .!= y_mode);
+    splitVariable = [];
+    splitValue = [];
+    splitYes = y_mode;
+    splitNo = [];
+
+    # Search for the best rule
+    # (Uses O(n^2d) approach to keep code simple)
+    yhat = zeros(n)
+    for j in 1:d
+        # Try unique values of column as split values
+        for val in unique(X[:,j])
+
+            # Test whether each object satisfies equality
+            yes = X[:,j] .> val
+
+            # Find correct label on both sides of split
+            y_yes = mode(y[yes])
+            y_no = mode(y[.!yes])
+
+            # Make predictions
+            yhat[yes] = y_yes
+            yhat[.!yes] = y_no
+
+            # Compute error
+            trainError = sum(yhat .!= y)
+
+            # Update best rule
+            if trainError < minError
+	            minError = trainError
+                splitVariable = j
+                splitValue = val
+                splitYes = y_yes
+                splitNo = y_no
+            end
+        end
+    end
+
+    # Now that we have the best rule,
+    # let's build our splitting function
+    function split(Xhat)
+        (t,d) = size(Xhat)
+        if isempty(splitVariable)
+            return fill(true,t)
+        else
+		    return (Xhat[:,splitVariable] .> splitValue)
+        end
+    end
+
+    # Now that we have the best rule,
+    # let's build our predict function
+    function predict(Xhat)
+        (t,d) = size(Xhat)
+        yes = split(Xhat)
+        yhat = fill(splitYes,t)
+        if any(.!yes)
+            yhat[.!yes] = splitNo
+        end
+        return yhat
+    end
+
+    return StumpModel(predict,split,isempty(splitNo))
+end
+\end{verbatim}
+
+Code can also be found in \texttt{decisionStump.jl}\\
 Training Error of \texttt{decisionStump}: 0.25
 
 \subsection{Constructing Decision Trees}
@@ -178,16 +250,16 @@ In this section we'll implement naive Bayes, a very fast classification method t
 \end{enumerate}
 
 (c)\\
-$p( y = 1 |  x_1 = 1 , x_2 = 0 ) 
+$p( y = 1 |  x_1 = 1 , x_2 = 0 )
     \\ \propto p(  x_1 = 1  | y = 1 ) p(  x_2 = 0  | y = 1 ) p( y =1)$.
     \newline = $ (\frac{1}{2}) (\frac{1}{3})(\frac{6}{10}) $
     \newline = $0.1$
 \\\\
-$p( y = 0 |  x_1 = 1 , x_2 = 0 ) 
+$p( y = 0 |  x_1 = 1 , x_2 = 0 )
         \\\propto p(  x_1 = 1  | y = 0 ) p(  x_2 = 0  | y = 0 ) p( y =0)$.
         \newline =$ (1) (\frac{3}{4})(\frac{4}{10}) $
         \newline = $0.3$
-\newline 
+\newline
 \\Since the $p( y = 0 |  x_1 = 1 , x_2 = 0 ) $ is bigger , the most likely label is 0.
 
 
@@ -202,8 +274,83 @@ $p( y = 0 |  x_1 = 1 , x_2 = 0 )
 
 
 \subsection{Naive Bayes Implementation}
+\begin{verbatim}
+    function naiveBayes(X,y)
+    # Implementation of naive Bayes classifier for binary features
 
-See code in \texttt{naiveBayes.jl}
+    (n,d) = size(X)
+
+    # Compute number of classes, assuming y in {1,2,...,k}
+    k = maximum(y)
+
+    # We will store p(y(i) = c) in p_y(c)
+    counts = zeros(k)
+    for i in 1:n
+      counts[y[i]] += 1
+    end
+    p_y = counts ./= n
+
+    # We will store p(x(i,j) = 1 | y(i) = c) in p_xy(1,j,c)
+    # We will store p(x(i,j) = 0 | y(i) = c) in p_xy(2,j,c)
+
+    p_xy = zeros(2,d,k)
+
+    # Q4.3
+    function cal_p_xy(X, j, c, xval)
+      (n,d) = size(X)
+      match = 0;
+      total = 0
+      Xj = X[:,j]
+      for a in 1:n
+
+        if (y[a] == c)
+          total += 1
+          if (Xj[a] == xval)
+            match += 1
+          end
+        end
+
+      end
+
+      return (total == 0) ? 0 : match / total
+    end
+
+    for c in 1:k
+      for j in 1:d
+        p_xy[1,j,c] = cal_p_xy(X,j,c,1)
+        p_xy[2,j,c] = cal_p_xy(X,j,c,0)
+      end
+    end
+
+    function predict(Xhat)
+      (t,d) = size(Xhat)
+      yhat = zeros(t)
+
+      for i in 1:t
+        # p_yx = p_y*prod(p_xy) for the appropriate x and y values
+        p_yx = copy(p_y)
+        for j in 1:d
+          if Xhat[i,j] == 1
+            for c in 1:k
+              p_yx[c] *= p_xy[1,j,c]
+            end
+          else
+            for c in 1:k
+              p_yx[c] *= p_xy[2,j,c]
+            end
+          end
+          (~,yhat[i]) = findmax(p_yx)
+        end
+      end
+      return yhat
+    end
+
+    return GenericModel(predict)
+  end
+\end{verbatim}
+
+
+Code can also be found in \texttt{naiveBayes.jl}
 
 \subsection{Runtime of Naive Bayes for Discrete Data}
 
@@ -214,13 +361,36 @@ The cost of classifying is $O(tdk)$. Because the dominant cost is computing $p(X
 
 \subsection{KNN Prediction}
 
-\enum{
-	\item See code in \texttt{knn.jl}
+\begin{enumerate}
+    \item Code can also be found in \texttt{knn.jl} \\
+    \begin{verbatim}
+        function knn_predict(Xhat,X,y,k)
+            (n,d) = size(X)
+            (t,d) = size(Xhat)
+            k = min(n,k) # To save you some debuggin
+
+            D = zeros(t, n)
+            yhat = zeros(t)
+
+            for i in 1:t
+                for j in 1:n
+                    D[i, j] = sqrt(sum((Xhat[i,:] .- X[j,:]).^2))
+                end
+            end
+
+            for i in 1:t
+                rank = sortperm(D[i,:])
+                yhat[i] = mode(y[rank[1:k]])
+            end
+
+            return yhat
+        end
+    \end{verbatim}
 	\item $x(k, Etrain, Etest) = (1, 0.000, 0.286), (3, 0.028, 0.286), (10, 0.072, 0.286)$
 	\item See Figure 2 below
 	\item This is because the there is only one nearest neighbour and the nearest neighbour of any point in \texttt{Xhat} is always itself as \texttt{Xhat} is equal to \texttt{X} when calculating the training error. This means the predicted label is always the same as the actual label, meaning the training error = 0.
 	\item Use cross validation to choose the best $k$. Using the \texttt{citiesSmall} dataset a fold of 5 would probably make sense.
-} 
+\end{enumerate}
 \begin{figure}[h!]
   \includegraphics[height=7.5cm]{knn_train_data_k=1.png}
   \caption{KNN Training Data on k=1}

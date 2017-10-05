@@ -18,7 +18,7 @@ function naiveBayes(X,y)
   # We will store p(x(i,j) = 1 | y(i) = c) in p_xy(1,j,c)
   # We will store p(x(i,j) = 0 | y(i) = c) in p_xy(2,j,c)
 
-   p_xy = zeros(2,d,k)
+  p_xy = zeros(2,d,k)
 
   # Q4.3
   function cal_p_xy(X, j, c, xval)
