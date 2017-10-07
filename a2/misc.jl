@@ -44,6 +44,20 @@ function distancesSquared(X1,X2)
 	return X1.^2*ones(d,t) + ones(n,d)*(X2').^2 - 2X1*X2'
 end
 
+# Return L1-norm of  all pairs of rows in X1 and X2
+function LOneNorms(X1,X2)
+	(n,d) = size(X1)
+	(t,d2) = size(X2)
+	assert(d==d2)
+	D = zeros(n,t)
+	for i in 1:n
+		for j in 1:t
+			D[i,j] = sum(abs.(X1[i,:] .- X2[j,:]));
+		end
+	end
+	return D
+end
+
 
 ### A function to compute the gradient numerically
 function numGrad(func,x)
