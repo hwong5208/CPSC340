@@ -266,43 +266,65 @@ Q2 Figures:
 \section{More Unsupervised Learning}
 
 \subsection{Density-Based Clustering}
-
-If you run the function \emph{example\_dbCluster}, it will apply the basic density-based clustering algorithm to the dataset from the previous part. The final output should look like this:\\
-%\fig{.49}{density}\fig{.49}{density2}\\
-(The right plot is zoomed in to show the non-outlier part of the data.)
-Even though we know that each object was generated from one of four clusters (and we have 4 outliers), the algorithm finds 6 clusters and does not assign some of the original non-outlier objects to any cluster. However, the clusters will change if we change the parameters of the algorithm. Find and report values for the two parameters (\emph{radius} and \emph{minPts}) such that the density-based clustering method finds:
-\blu{\enum{
-\item The 4 ``true" clusters.
-\item 3 clusters (merging the top two, which also seems like a reasonable interpretaition).
-\item 2 clusters.
-\item 1 cluster (consisting of the non-outlier points).
-}
+\enum{
+\item \texttt{radius = 2, minPoints = 2}
+\item \texttt{radius = 4, minPoints = 2}
+\item \texttt{radius = 15, minPoints = 5}
+\item \texttt{radius = 50, minPoints = 2}
 }
 
 \subsection{Vector Quantization}
 
+\begin{enumerate}
+\item
+\begin{verbatim}
+function quantizeImage(fn,b)
+    Xo = imread(fn);
+    (nRows,nCols) = size(Xo);
+    X = reshape(Xo, (nRows*nCols,3));
 
-Discovering object groups is one motivation for clustering. Another motivation is \emph{vector quantization}, where we find a prototype point for each cluster and replace points in the cluster by their prototype. If our inputs are images, we could use vector quantization on the set of RGB pixel values as a simple image compression algorithm.
+    model = kMeans(X,2^b,doPlot=false)
+    return model.y,model.W,nRows,nCols
+end
 
-Your task is to implement this simple image compression algorithm by writing a \texttt{quantizeImage} and a \texttt{deQuantizeImage} function. The \texttt{quantizeImage} function should take the name of an image file (like ``dog.png'' for the provided image) and a number $b$ as input. It should use the pixels in the image as examples and the 3 colour channels as features, and run $k$-means clustering on this data with $2^b$ clusters. The code should store the cluster means and return four arguments: the cluster assignments $y$, the means $W$, the number of rows in the image $nRows$, and the number of columns $nCols$. The \texttt{deQuantizeImage} function should take these four arguments and return a version of the image (the same size as the original) where each pixel's original colour is replaced with the nearest prototype colour. 
+function deQuantizeImage(y,W,nRows,nCols)
+    X = zeros(nRows*nCols,3)
+    for i in 1:nRows*nCols
+        X[i,:] = W[Int(y[i]),:];
+    end
 
-To understand why this is compression, consider the original image space. Say the image can take on the values $0,1,\ldots,254,255$ in each colour channel. Since $2^8=256$ this means we need 8 bits to represent each colour channel, for a total of 24 bits per pixel. Using our method, we are restricting each pixel to only take on one of $2^b$ colour values. In other words, we are compressing each pixel from a 24-bit colour representation to a $b$-bit colour representation by picking the $2^b$ prototype colours that are ``most representative'' given the content of the image. So, for example, if $b=6$ then we have 4x compression.
+    Xo = reshape(X, (nRows,nCols,3));
+    imshow(Xo);
+    return Xo
+end
+\end{verbatim}
+\item See Figures \ref{fig:q3_2_1}, \ref{fig:q3_2_2}, \ref{fig:q3_2_3}, \ref{fig:q3_2_4}
+\end{enumerate}
+\begin{figure}
+    \includegraphics[width=30em]{a2_q3_2_1.png}
+    \caption{dog.png encoded with 1 bit per pixel(Q.3.3)}
+    \label{fig:q3_2_1}
 
-Note: if you install the ``Images'' package then you can read in the image using the ``imread'' function (it takes a file name and returns a $nRows$ by $nCols$ by $3$ array containing the images RGB values). Similarly, the ``imshow'' function can display an image represented in this format. You may find it help to use the ``reshape'' function.
+    \includegraphics[width=30em]{a2_q3_2_2.png}
+    \caption{dog.png encoded with 2 bits per pixel(Q3.3)}
+    \label{fig:q3_2_2}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=30em]{a2_q3_2_3.png}
+    \caption{dog.png encoded with 4 bits per pixel(Q3.3)}
+    \label{fig:q3_2_3}
 
-\blu{\enum{
-\item Hand in your \emph{quantizeImage} and \emph{deQuantizeImage} functions.
-\item Show the image obtained if you encode the colours using $1$, $2$, $4$, and $6$ bits per pixel (instead of the original 24-bits).
-}}
-
+    \includegraphics[width=30em]{a2_q3_2_4.png}
+    \caption{dog.png encoded with 6 bits per pixel(Q3.3)}
+    \label{fig:q3_2_4}
+ \end{figure}
 \subsection{Very-Short Answer Questions}
 
-\blu{
 \enum{
-\item Suppose that you had only two features and that they have very-different scales (like kilograms vs. milligrams). How would this affect the result of density-based clustering?
-\item Name a key advantage and drawback of using a supervised outlier detection method rather than an unsupervised method?
-\item Given an $n \times 2$ matrix $X$ and a test query $\hat{x}$, what is the cost of finding all rows $i$ in $X$ where $\norm{x_i - \hat{x}} \leq r$ for some $r > 0$? How does this cost change if I give you a hash table that assigns rows of $X$ to keys that divide the space into a 2D grid of squares with radius $r$, if we use $k$ to denote the maximum number of points hashed to the same key value?
-}}
+\item The feature with the smaller scale would have very little influence over whether a point is 'reachable' or not. For example, a point can be very close (~1:1 ratio) to another point on the large-scale feature but very far (several times away) on the small-scale feature, but it might still be 'reachable' from the other point because the smaller-scale feature difference won't add a lot to the overall distance.
+\item Advantage: we can actually tell the algorithm what is considered an 'outlier' instead of having the algorithm figure out what it is, where it may potentially be determined to be something else. Drawback: it takes a lot of time to manually label the outliers in the training dataset.
+\item Essentially, we are looking for points that are within the distance $r$ from the test query point on a 2D grid. This will take $O(n)$ time because we have to go through each point. If we use the hash table approach, assuming the hash table is already filled out, this approach will require us to find the square that contains the test query and its 8 neighbors, which would take constant time since they're all stored in a hash table. Then we would have to go through the elements in each of the 9 grids to check if they are within $r$ units from the test query, so this approach will take maximum $9k$ time, i.e. $O(k)$.
+}
 
 \section{Matrix Notation and Linear Regression}
 
