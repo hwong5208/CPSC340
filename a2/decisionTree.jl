@@ -291,3 +291,31 @@ function randomTree(X,y,depth)
 end
 
 
+function randomForest(X,y,depth,nTrees)
+	(n,d) = size(X)
+	subModels = Array{GenericModel}(nTrees)
+	for m in 1:nTrees
+
+		#samples = rand(1:n,Int(floor(sqrt(n))))
+       # subModels[m]= randomTree(X[samples,:],y[samples],depth)
+         subModels[m]= randomTree(X,y,depth)
+	end
+ 
+	function predict(Xhat)
+		 a = length(subModels)
+        (n,d) = size(Xhat)
+        y = ones(n,a)
+	    for m in 1:length(subModels)
+	    	y[:,m] = subModels[m].predict(Xhat)
+	    end
+	    yhat=zeros(n,1)
+	    for i in 1:n
+	      yhat[i] = mode(y[i,:])
+	  
+	    end
+	    return yhat
+	    
+	end	
+   return GenericModel(predict)
+
+end

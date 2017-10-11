@@ -72,6 +72,58 @@ fits \texttt{nTrees} random trees each with maximum depth \texttt{depth}. For pr
 }
 }
 
+\begin{enumerate}
+\item After a certain depth, the stump doesn't split the data, and the trainf functions will be terminated.
+\item  Because random tree have different splits with randomly samples, it cannot it cannot overfits. Therefore, the random tree model doesn't have a training error of 0.
+
+  
+
+\item \begin{verbatim}
+
+function randomForest(X,y,depth,nTrees)
+	(n,d) = size(X)
+	subModels = Array{GenericModel}(nTrees)
+	for m in 1:nTrees
+
+		#samples = rand(1:n,Int(floor(sqrt(n))))
+       # subModels[m]= randomTree(X[samples,:],y[samples],depth)
+         subModels[m]= randomTree(X,y,depth)
+	end
+ 
+	function predict(Xhat)
+		 a = length(subModels)
+        (n,d) = size(Xhat)
+        y = ones(n,a)
+	    for m in 1:length(subModels)
+	    	y[:,m] = subModels[m].predict(Xhat)
+	    end
+	    yhat=zeros(n,1)
+	    for i in 1:n
+	      yhat[i] = mode(y[i,:])
+	  
+	    end
+	    return yhat
+	    
+	end	
+   return GenericModel(predict)
+
+end
+\end{verbatim}
+
+\item
+Yes
+ \begin{verbatim}
+Train Error with depth-Inf decision tree: 0.000
+Test Error with depth-Inf decision tree: 0.367
+Train Error with depth-5 random tree: 0.455
+Test Error with depth-5 random tree: 0.564
+Train Error with depth-Inf random forest: 0.000
+Test Error with depth-Inf random forest: 0.167
+\end{verbatim}
+
+
+\end{enumerate}
+
 \subsection{Very-Short Answer Questions}
 
 \blu{\enum{
@@ -90,6 +142,20 @@ fits \texttt{nTrees} random trees each with maximum depth \texttt{depth}. For pr
 \item Suppose that you were training on raw audio segments and trying to recognize vowel sounds. What could you do to encourage the final classifier to be invariant to translation?
 }
 }
+
+
+\begin{enumerate}
+\item the runtime is too high
+\item 
+\begin{enumerate}
+     \item Decrease the maximum depth of the trees in your forest.
+    \item Decrease the amount of data you consider for each tree (Use 0.8n objects instead of n).
+    \item Decrease the number of features you consider for each tree.
+    \end{enumerate}
+ \item Use random forest with bootstrap and randomly chosen feasture an more tree.
+ 
+\end{enumerate}
+
 
 \section{K-Means Clustering}
 
@@ -339,6 +405,12 @@ express the following functions in terms of vectors, matrices, and norms (there 
 }}
 You can use $V$ to denote a diagonal matrix that has the values $v_i$ along the diagonal.
 
+\begin{enumerate}
+     \item  $ \norm{Xw-y}$
+    \item  $ \norm{Xw-y}_\infty +   \frac{\lambda}{2}\norm{Xw-y}_2$
+    \item  $ (Xw-y)^T V(Xw-y) +   \lambda\norm{w}_1$
+ 
+\end{enumerate}
 
 
 \subsection{Minimizing Quadratic Functions as Linear Systems}
@@ -353,6 +425,36 @@ Write finding a minimizer $w$ of the functions below as a system of linear equat
 Above we assume that $u$ is a $d$ by $1$ vector, and $\Lambda$ is a $d$ by $d$ diagonal matrix with positive entries along the diagonal.
 
 Hint: Once you convert to vector/matrix notation, you can use the results from class to quickly compute these quantities term-wise. As a sanity check for your derivation, make sure that your results have the right dimensions.
+
+
+\begin{enumerate}
+     \item  $f(w) = \frac{1}{2}\norm{w-u}^2$\\
+                      	$ = \frac{1}{2}(w-u)^T (w-u)$\\
+                     	$ = \frac{1}{2}(w^T-u^T) (w-u)$\\
+				$ = \frac{1}{2}(w^T w - 2w^T u + u^T U)$\\
+                      	$= \frac{1}{2}\norm{w}^2 - w^T u +  \frac{1}{2}\norm{w}^2$\\
+ 				 $\nabla f(w) = w-u$ \\
+               
+    \item   $f(w) = \frac{1}{2}\norm{w}^2 + w^TX^Ty$\\
+                   $ = \frac{1}{2}(w^T w) + w^TX^Ty$\\
+			  $ \nabla f(w) =  w+ X^T$\\
+   
+      \item   $f(w)= \frac{1}{2}\norm{Xw - y}^2 + \frac{1}{2}w^T\Lambda w$\\
+                 $= \frac{1}{2}(w^TX^T-y^T)(Xw-y) + \frac{1}{2}w^T\Lambda w$\\
+			    $= \frac{1}{2}((Xw)^T(Xw)-2y(Xw)-y^Ty) + \frac{1}{2}w^T\Lambda w$\\
+ 			$= \frac{1}{2}w^T(x^Tx)w - w^Tx^Ty-  \frac{1}{2}y+ \frac{1}{2}w^T\Lambda w$\\
+                 $ \nabla f(w) = X^TXw- X^Ty+\Lambda w$\\
+
+
+        \item  $f(w) = \frac{1}{2}\sum_{i=1}^n v_i (w^Tx_i - y_i)^2$\\
+                 $ = \frac{1}{2}( (Xw-y)^TV(Xw-y)$\\
+                    $ = \frac{1}{2}( (w^TX^T-y^T)^V(Xw-y)$\\
+                    $ = \frac{1}{2}(w^TX^TVXw - y^TVXw- w^TX^TVy+y^TVy)$\\
+                     $ = \frac{1}{2}(w^TX^TVXw) -  (w^TX^TVy)+ \frac{1}{2}(y^TVy)$\\
+  			$ \nabla f(w) = X^TVXw- X^TVy$\\
+
+ 
+\end{enumerate}
 
 
 
@@ -385,6 +487,54 @@ y_i = w^Tx_i.
 
 Hint: recall that adding a bias $w_0$ is equivalent to adding a column of ones to the matrix $X$. Don't forget that you need to do the same transformation in the \emph{predict} function.
 
+\begin{enumerate}
+
+
+\item \begin{verbatim}
+
+function leastSquaresBias(X,y)
+
+     (n,)= size(X)
+     X0 =  addBasis(X)
+    # Find regression weights minimizing squared error
+    w = (X0'*X0)\(X0'*y)
+
+    # Make linear prediction function
+    predict(Xhat) =   addBasis(Xhat)*w
+
+    # Return model
+    return GenericModel(predict)
+end
+
+function addBasis(X)
+    (n,)= size(X)
+    X0 = ones(n,2)
+    for i in 1:n
+        X0[i,2]= X[i]
+     end 
+   return X0
+end 
+
+ \end{verbatim}
+
+
+\begin{figure}[h!]
+  \includegraphics[width=30em,height=7.5cm]{a2_q4_3.png}
+
+\end{figure}
+
+
+\item
+ \begin{verbatim}
+Squared train Error with least squares: 3551.346
+Squared test Error with least squares: 3393.869
+ \end{verbatim}
+
+
+\end{enumerate}
+
+
+
 
 \subsection{Linear Regression with Polynomial Basis}
 
@@ -406,6 +556,68 @@ Note: for this question we'll assume $d=1$ (we'll discuss polynomial bases with 
 
 Hints: To keep the code simple and reduce the chance of having errors, you may want to write a new function \emph{polyBasis} that you can use for transforming both the training and testing data. 
 
+\begin{enumerate}
+ 
+\item
+\begin{verbatim}
+function leastSquaresBasis(X,y,p)
+
+     (n,)= size(X)
+      X0 = polyBasis(X,p)
+
+
+    # Find regression weights minimizing squared error
+    w = (X0'*X0)\(X0'*y)
+
+    # Make linear prediction function
+    predict(Xhat) = polyBasis(Xhat,p)*w
+
+    # Return model
+    return GenericModel(predict)
+end
+
+function polyBasis(X,p)
+    (n,)= size(X)
+    X0 = ones(n,p+1)
+    for i in 1:n
+        X0[i,2]= X[i]
+     end 
+   for i in 3:p+1
+      X0[:,i]= X0[:,2].^(i-1)
+   end
+   return X0
+end 
+ \end{verbatim}
+
+
+\item
+ \begin{verbatim}
+Squared train Error with p: 1 and least squares: 3551.346
+Squared test Error with p: 1 and least squares: 3393.869
+Squared train Error with p: 2 and least squares: 2167.992
+Squared test Error with p: 2 and least squares: 2480.725
+Squared train Error with p: 3 and least squares: 252.046
+Squared test Error with p: 3 and least squares: 242.805
+Squared train Error with p: 4 and least squares: 251.462
+Squared test Error with p: 4 and least squares: 242.126
+Squared train Error with p: 5 and least squares: 251.143
+Squared test Error with p: 5 and least squares: 239.545
+Squared train Error with p: 6 and least squares: 248.583
+Squared test Error with p: 6 and least squares: 246.005
+Squared train Error with p: 7 and least squares: 247.011
+Squared test Error with p: 7 and least squares: 242.888
+Squared train Error with p: 8 and least squares: 241.306
+Squared test Error with p: 8 and least squares: 245.966
+Squared train Error with p: 9 and least squares: 235.762
+Squared test Error with p: 9 and least squares: 259.296
+Squared train Error with p: 10 and least squares: 235.074
+Squared test Error with p: 10 and least squares: 256.300
+ \end{verbatim}
+
+\item As p increasing , the train error and testing error will decrease. And until p reach to 8, the model are being overfit.
+
+\end{enumerate}
+
 
 
 \subsection{Manual Search for Optimal Basis}
@@ -414,7 +626,59 @@ Polynomials are a flexible class of functions, but there is structure in this da
 
 Hint: the data seems to have periodic behaviour, and it's possible to obtain training and test errors below 60.
 
+\begin{enumerate}
+\item
+ \begin{verbatim}
 
+function leastTanBasis(X,y)
+
+     (n,)= size(X)
+      X0 = tanBasis(X)
+
+
+    # Find regression weights minimizing squared error
+    w = (X0'*X0)\(X0'*y)
+
+    # Make linear prediction function
+    predict(Xhat) = tanBasis(Xhat)*w
+
+    # Return model
+    return GenericModel(predict)
+end
+
+function tanBasis(X)
+    (n,)= size(X)
+    X0 = ones(n,12)
+
+    for i in 1:n
+        X0[i,2] =X[i]
+        X0[i,3]= tan(0.1357*X[i])
+        X0[i,4]= tan(0.1357*X[i]).^2
+         X0[i,5]= tan(0.1357*X[i]).^3
+         X0[i,6]= tan(0.1357*X[i]).^4
+         X0[i,7]= tan(0.1357*X[i]).^5
+         X0[i,8]= tan(0.1357*X[i]).^6
+         X0[i,9]= tan(0.1357*X[i]).^7
+         X0[i,10]= tan(0.1357*X[i]).^8
+         X0[i,11] = sin(X[i])  
+         X0[i,12] = sin(X[i]).^2  
+         
+     end 
+
+   return X0
+end
+
+ \end{verbatim}
+
+
+\item
+
+  \begin{verbatim}
+Squared train Error with least squares: 241.804
+Squared test Error with least squares: 368.812
+  \end{verbatim}
+
+\end{enumerate}
 
 \subsection{Very-Short Answer Questions}
 
@@ -426,6 +690,26 @@ Hint: the data seems to have periodic behaviour, and it's possible to obtain tra
 \item  In what circumstance would a regression tree with linear regressions at the leaves be a better choice than a linear least squares regression model?
 }}
 
+\begin{enumerate}
+\item Linear regression is usually for continuous data. It is impossible for line to pass through all the data point. And aslo, linear regression is not predicting the exact number.
+\item 
+When two features that are collinear , the least squares estimate would not be unique. Because when increase weight on one feature, and decrease it on the other, it would not changing predictions.
+
+\item 
+
+  \begin{verbatim}
+The computational complexity of cllosed-form is W = (X0'*X0)/(X0'*y). 
+The runtime of  (X0'*X0) is O(np^2). And, the runtime of  (X0'*y)  is O(np). 
+The runtime of solving W is O(p^3).
+The total runtime  = O(p^3) +O(np^2) + O(np).
+Since O(np^2) domidate O(np) , and in generl n>p, therefore, total runtime = O(np^2).
+  \end{verbatim}
+
+
+\item
+Regression tree is suitable for data ploted line shows data don't have a continuous line.  
+
+\end{enumerate}
 
 \section{Robust Regression and Gradient Descent}
 

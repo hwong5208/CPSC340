@@ -33,5 +33,24 @@ trainError = mean(yhat .!= y)
 
 # Evaluate test error
 yhat = model.predict(Xtest)
+#println(yhat)
 testError = mean(yhat .!= ytest)
 @printf("Test Error with depth-%d random tree: %.3f\n",depth,testError)
+
+
+## Random Forests
+
+# Fit a random forest classifier
+include("decisionTree.jl")
+depth = Inf
+model = randomForest(X,y,depth,50)
+
+# Evaluate training error
+yhat = model.predict(X)
+trainError = mean(yhat .!= y)
+@printf("Train Error with depth-%d random forest: %.3f\n",depth,trainError)
+
+# Evaluate test error
+yhat = model.predict(Xtest)
+testError = mean(yhat .!= ytest)
+@printf("Test Error with depth-%d random forest: %.3f\n",depth,testError)
