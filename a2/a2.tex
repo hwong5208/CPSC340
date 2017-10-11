@@ -731,6 +731,37 @@ Write a model function, \emph{weightedLeastSquares(X,y,v)}, that implements this
 Apply this model to the data containing outliers, setting $v_i = 1$ for the first $400$ data points and $v_i = 0.1$ for the last $100$ data points (which are the outliers). \blu{Hand in your function and the updated plot}.
 
 
+  \begin{verbatim}
+
+function weigthedleastSquares(X,y,v)
+    (n,) = size(v)
+    V =  zeros(n,n)
+     
+    for i in 1:n
+        for j in 1:n
+            if i==j
+                V[i,j]=v[i]
+              end 
+        end
+    end
+    
+    w = (X'*V*X)\(X'*V*y)
+    # Make linear prediction function
+    predict(Xhat) = Xhat*w
+
+    # Return model
+    return GenericModel(predict)
+end
+
+  \end{verbatim}
+
+\begin{figure}[h!]
+  \includegraphics[width=30em,height=7.5cm]{a2_q5_1.png}
+
+\end{figure}
+
+
+
 \subsection{Smooth Approximation to the L1-Norm}
 
 Unfortunately, we typically do not know the identities of the outliers. In situations where we suspect that there are outliers, but we do not know which examples are outliers, it makes sense to use a loss function that is more robust to outliers. In class, we discussed using the sum of absolute values objective,
@@ -749,6 +780,8 @@ f(w) = \sum_{i=1}^n  \log\left(\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)\right).
 which is smooth but less sensitive to outliers than the squared error. \blu{Derive
  the gradient $\nabla f$ of this function with respect to $w$. You should show your work but you do not have to express the final result in matrix notation.}
 
+$\nabla _w(log(exp(w^Tx_i-y_i)+exp(y_i-w^Tx_i))= \frac{x_i(exp(w^Tx_i-y_i)-exp(y_i-w^Tx_i))}{(exp(w^Tx_i-y_i)+exp(y_i-w^Tx_i))ln(e)}$\\
+$\nabla f= \sum\limits_{i=1}^{n}\frac{x_i(exp(w^Tx_i-y_i)-exp(y_i-w^Tx_i))}{(exp(w^Tx_i-y_i)+exp(y_i-w^Tx_i))}$
 
 \subsection{Robust Regression}
 
@@ -758,6 +791,26 @@ The function \emph{example\_gradient} is the same as \emph{example\_outlier}, ex
 The typical input to a gradient method is a function that, given $w$, returns $f(w)$ and $\nabla f(w)$. See \emph{funObj} in the \emph{leastSquaresGradient} function for an example. Note that \emph{leastSquaresGradient} also has a numerical check that the gradient code is approximately correct, since implementing gradients is often error-prone.\footnote{Though sometimes the numerical gradient checker itself can be wrong. For a lot more on numerical differentiation you can take CPSC 303.}
 
 An advantage of gradient-based strategies is that they are able to solve problems that do not have closed-form solutions, such as the formulation from the previous section. The function \emph{robustRegression} has most of the implementation of a gradient-based strategy for fitting the robust regression model under the log-sum-exp approximation. The only part missing is the function and gradient calculation inside the \emph{funObj} code. \blu{Modify this function to implement the objective function and gradient based on the smooth approximation to the absolute value function (from the previous section). Hand in your code, as well as the plot obtained using this robust regression appraoch.}
+
+\begin{enumerate}
+
+\begin{figure}[h!]
+  \includegraphics[width=30em,height=7.5cm]{a2_q5_3.png}
+
+\end{figure}
+
+\item
+  \begin{verbatim}
+function leastSquaresObj(w,X,y)
+
+	f = sum(log(exp.(X*w-y)+exp.(y-X*w)))
+	g = X'*((exp.(X*w-y)-exp.(y-X*w))./(exp.(X*w-y)+exp.(y-X*w)))
+	return (f,g)
+end
+
+  \end{verbatim}
+
+\end{enumerate}
 
 \subsection{Very-Short Answer Questions}
 

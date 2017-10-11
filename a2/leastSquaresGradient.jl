@@ -35,8 +35,8 @@ function leastSquaresGradient(X,y)
 end
 
 function leastSquaresObj(w,X,y)
-	Xw = X*w
-	f = (1/2)sum((Xw - y).^2)
-	g = X'*(Xw - y)
+
+	f = sum(log(exp.(X*w-y)+exp.(y-X*w)))
+	g = X'*((exp.(X*w-y)-exp.(y-X*w))./(exp.(X*w-y)+exp.(y-X*w)))
 	return (f,g)
 end

@@ -43,6 +43,32 @@ function leastSquaresBasis(X,y,p)
     return GenericModel(predict)
 end
 
+function weigthedleastSquares(X,y,v)
+    (n,) = size(v)
+    V =  zeros(n,n)
+     
+    for i in 1:n
+        for j in 1:n
+            if i==j
+                V[i,j]=v[i]
+            #  V[i][j]= v[i]+0.0
+              end 
+        end
+    end
+
+
+  #  println(size(X'))
+   #  println(V)
+   #   println(size(y))
+    w = (X'*V*X)\(X'*V*y)
+    # Make linear prediction function
+    predict(Xhat) = Xhat*w
+
+    # Return model
+    return GenericModel(predict)
+end
+
+
 function leastTanBasis(X,y)
 
      (n,)= size(X)
@@ -86,7 +112,6 @@ function tanBasis(X)
     X0 = ones(n,12)
 
     for i in 1:n
-       # X0[i,2]= 250*tan(0.1357*X[i])
         X0[i,2] =X[i]
         X0[i,3]= tan(0.1357*X[i])
         X0[i,4]= tan(0.1357*X[i]).^2
@@ -100,9 +125,7 @@ function tanBasis(X)
          X0[i,12] = sin(X[i]).^2  
          
      end 
-  # for i in 3:p+1
- #     X0[:,i]= X0[:,2].^(i-1)
- #  end
+
    return X0
 end
 

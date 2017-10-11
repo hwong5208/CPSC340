@@ -40,6 +40,6 @@ function findMin(funObj,w,maxIter=100,epsilon=1e-2)
 			return w
 		end
 	end
-end
 @printf("Reached maximum number of iterations\n")
 return w
+end
