@@ -6,7 +6,7 @@ data = load("basisData.jld")
 # Fit a least squares model
 include("leastSquares.jl")
 #model = leastSquares(X,y)
-model = leastTanBasis(X,y)
+model = leastSinBasis(X,y)
 #model = leastSquaresBasis(X,y,10)
 #model = leastSinBasis(X,y)
 # Evaluate training error

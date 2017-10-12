@@ -821,4 +821,14 @@ end
 \item Why are we smoothing the absolute value? Why can't we just set the gradient to 0 and solve a linear system?
 }}
 
+
+\begin{enumerate}
+\item  Clusterbased
+\item
+\begin{verbatim}
+  The runtime of closed form is  O(nd^2 +d^3). And the runtime of gradient descent is O(nd). we should consider it when D is large. 
+  \end{verbatim}
+\item Because there are a lot linear systems that we cannot easy to solve it.   
+
+\end{enumerate}
 \end{document}
