@@ -51,15 +51,10 @@ function weigthedleastSquares(X,y,v)
         for j in 1:n
             if i==j
                 V[i,j]=v[i]
-            #  V[i][j]= v[i]+0.0
               end 
         end
     end
-
-
-  #  println(size(X'))
-   #  println(V)
-   #   println(size(y))
+    
     w = (X'*V*X)\(X'*V*y)
     # Make linear prediction function
     predict(Xhat) = Xhat*w
@@ -69,17 +64,17 @@ function weigthedleastSquares(X,y,v)
 end
 
 
-function leastTanBasis(X,y)
+function leastSinBasis(X,y)
 
      (n,)= size(X)
-      X0 = tanBasis(X)
+      X0 = sinBasis(X)
 
 
     # Find regression weights minimizing squared error
     w = (X0'*X0)\(X0'*y)
 
     # Make linear prediction function
-    predict(Xhat) = tanBasis(Xhat)*w
+    predict(Xhat) = sinBasis(Xhat)*w
 
     # Return model
     return GenericModel(predict)
@@ -107,23 +102,18 @@ function polyBasis(X,p)
    return X0
 end 
 
-function tanBasis(X)
+function sinBasis(X)
     (n,)= size(X)
-    X0 = ones(n,12)
+    X0 = ones(n,5)
 
     for i in 1:n
-        X0[i,2] =X[i]
-        X0[i,3]= tan(0.1357*X[i])
-        X0[i,4]= tan(0.1357*X[i]).^2
-         X0[i,5]= tan(0.1357*X[i]).^3
-         X0[i,6]= tan(0.1357*X[i]).^4
-         X0[i,7]= tan(0.1357*X[i]).^5
-         X0[i,8]= tan(0.1357*X[i]).^6
-         X0[i,9]= tan(0.1357*X[i]).^7
-         X0[i,10]= tan(0.1357*X[i]).^8
-         X0[i,11] = sin(X[i])  
-         X0[i,12] = sin(X[i]).^2  
-         
+        
+        X0[i,2] = (X[i]-2).^3
+
+         X0[i,3] = sin(5*X[i]) 
+         X0[i,4] = (X[i]-2)^2
+         X0[i,5] = (X[i]-2)
+
      end 
 
    return X0
