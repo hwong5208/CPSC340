@@ -23,7 +23,7 @@ testError = mean(yhat .!= ytest)
 
 # Fit a random tree classifier
 include("decisionTree.jl")
-depth = 5
+depth = Inf
 model = randomTree(X,y,depth)
 
 # Evaluate training error

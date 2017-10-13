@@ -73,40 +73,42 @@ fits \texttt{nTrees} random trees each with maximum depth \texttt{depth}. For pr
 }
 
 \begin{enumerate}
-\item After a certain depth, the stump doesn't split the data, and the trainf functions will be terminated.
-\item  Because random tree have different splits with randomly samples, it cannot it cannot overfits. Therefore, the random tree model doesn't have a training error of 0.
+\item \texttt{decisionTree} and \texttt{randomTree} reach the base case when either the depth becomes 0 or when one of the subtrees is empty. Even when \emph{depth} is \emph{Inf}, our data is still finite so the training functions will reach an empty sub tree at some point, hence terminate.
+\item  Because random tree have different splits with determined with randomly selected features, so it won't necessarily choose the 'optimal' split every time, so it may not reach 0 training error (i.e. it won't overfit). Therefore, the random tree model doesn't have a training error of 0.
 
   
 
 \item \begin{verbatim}
 
 function randomForest(X,y,depth,nTrees)
-	(n,d) = size(X)
-	subModels = Array{GenericModel}(nTrees)
-	for m in 1:nTrees
-
-		#samples = rand(1:n,Int(floor(sqrt(n))))
-       # subModels[m]= randomTree(X[samples,:],y[samples],depth)
-         subModels[m]= randomTree(X,y,depth)
-	end
+    (n,d) = size(X)
+    subModels = Array{GenericModel}(nTrees)
+    for m in 1:nTrees
+        
+    
+    
+    
+    subModels[m]= randomTree(X,y,depth)
+    end
  
 	function predict(Xhat)
-		 a = length(subModels)
+        a = length(subModels)
         (n,d) = size(Xhat)
         y = ones(n,a)
-	    for m in 1:length(subModels)
-	    	y[:,m] = subModels[m].predict(Xhat)
-	    end
-	    yhat=zeros(n,1)
-	    for i in 1:n
-	      yhat[i] = mode(y[i,:])
-	  
-	    end
-	    return yhat
-	    
-	end	
-   return GenericModel(predict)
 
+        for m in 1:length(subModels)
+            y[:,m] = subModels[m].predict(Xhat)
+        end
+        
+        yhat=zeros(n,1)
+        for i in 1:n
+            yhat[i] = mode(y[i,:])
+        end
+
+        return yhat
+    end
+    
+    return GenericModel(predict)
 end
 \end{verbatim}
 
@@ -115,8 +117,8 @@ Yes
  \begin{verbatim}
 Train Error with depth-Inf decision tree: 0.000
 Test Error with depth-Inf decision tree: 0.367
-Train Error with depth-5 random tree: 0.455
-Test Error with depth-5 random tree: 0.564
+Train Error with depth-Inf random tree: 0.220
+Test Error with depth-Inf random tree: 0.549
 Train Error with depth-Inf random forest: 0.000
 Test Error with depth-Inf random forest: 0.167
 \end{verbatim}
@@ -146,13 +148,11 @@ Test Error with depth-Inf random forest: 0.167
 
 \begin{enumerate}
 \item the runtime is too high
-\item 
-\begin{enumerate}
-     \item Decrease the maximum depth of the trees in your forest.
-    \item Decrease the amount of data you consider for each tree (Use 0.8n objects instead of n).
-    \item Decrease the number of features you consider for each tree.
-    \end{enumerate}
- \item Use random forest with bootstrap and randomly chosen feasture an more tree.
+\item %TODO 
+    (b) Decrease the maximum depth of the trees in your forest.\\
+    (d) Decrease the amount of data you consider for each tree (Use 0.8n objects instead of n).\\
+    (f) Decrease the number of features you consider for each tree.\\
+\item Translate some of the objects in various ways and add these to the training data set
  
 \end{enumerate}
 
@@ -407,7 +407,7 @@ You can use $V$ to denote a diagonal matrix that has the values $v_i$ along the 
 
 \begin{enumerate}
      \item  $ \norm{Xw-y}$
-    \item  $ \norm{Xw-y}_\infty +   \frac{\lambda}{2}\norm{Xw-y}_2$
+    \item  $ \norm{Xw-y}_\infty +   \frac{\lambda}{2}\norm{w}_2$
     \item  $ (Xw-y)^T V(Xw-y) +   \lambda\norm{w}_1$
  
 \end{enumerate}
@@ -431,13 +431,13 @@ Hint: Once you convert to vector/matrix notation, you can use the results from c
      \item  $f(w) = \frac{1}{2}\norm{w-u}^2$\\
                       	$ = \frac{1}{2}(w-u)^T (w-u)$\\
                      	$ = \frac{1}{2}(w^T-u^T) (w-u)$\\
-				$ = \frac{1}{2}(w^T w - 2w^T u + u^T U)$\\
+				$ = \frac{1}{2}(w^T w - 2w^T u + u^T u)$\\
                       	$= \frac{1}{2}\norm{w}^2 - w^T u +  \frac{1}{2}\norm{w}^2$\\
  				 $\nabla f(w) = w-u$ \\
                
     \item   $f(w) = \frac{1}{2}\norm{w}^2 + w^TX^Ty$\\
                    $ = \frac{1}{2}(w^T w) + w^TX^Ty$\\
-			  $ \nabla f(w) =  w+ X^T$\\
+			  $ \nabla f(w) =  w+ X^Ty$\\
    
       \item   $f(w)= \frac{1}{2}\norm{Xw - y}^2 + \frac{1}{2}w^T\Lambda w$\\
                  $= \frac{1}{2}(w^TX^T-y^T)(Xw-y) + \frac{1}{2}w^T\Lambda w$\\
@@ -614,7 +614,7 @@ Squared train Error with p: 10 and least squares: 235.074
 Squared test Error with p: 10 and least squares: 256.300
  \end{verbatim}
 
-\item As p increasing , the train error and testing error will decrease. And until p reach to 8, the model are being overfit.
+\item As p increasing, the training error and testing error both decrease until $p$ reaches 8, at which point we start to overfit so the testing error starts to increase even as the training error goes down.
 
 \end{enumerate}
 
@@ -654,14 +654,14 @@ function tanBasis(X)
         X0[i,2] =X[i]
         X0[i,3]= tan(0.1357*X[i])
         X0[i,4]= tan(0.1357*X[i]).^2
-         X0[i,5]= tan(0.1357*X[i]).^3
-         X0[i,6]= tan(0.1357*X[i]).^4
-         X0[i,7]= tan(0.1357*X[i]).^5
-         X0[i,8]= tan(0.1357*X[i]).^6
-         X0[i,9]= tan(0.1357*X[i]).^7
-         X0[i,10]= tan(0.1357*X[i]).^8
-         X0[i,11] = sin(X[i])  
-         X0[i,12] = sin(X[i]).^2  
+        X0[i,5]= tan(0.1357*X[i]).^3
+        X0[i,6]= tan(0.1357*X[i]).^4
+        X0[i,7]= tan(0.1357*X[i]).^5
+        X0[i,8]= tan(0.1357*X[i]).^6
+        X0[i,9]= tan(0.1357*X[i]).^7
+        X0[i,10]= tan(0.1357*X[i]).^8
+        X0[i,11] = sin(X[i])  
+        X0[i,12] = sin(X[i]).^2  
          
      end 
 
@@ -674,7 +674,7 @@ end
 \item
 
   \begin{verbatim}
-Squared train Error with least squares: 241.804
+Squared train Error with least squares: 241.804 
 Squared test Error with least squares: 368.812
   \end{verbatim}
 
@@ -691,23 +691,19 @@ Squared test Error with least squares: 368.812
 }}
 
 \begin{enumerate}
-\item Linear regression is usually for continuous data. It is impossible for line to pass through all the data point. And aslo, linear regression is not predicting the exact number.
+\item Linear regression is usually for continuous data. It is impossible for line to pass through all the data points so testing equality would result in a practically useless and very high error. And aslo, linear regression is not predicting the exact number.
 \item 
-When two features that are collinear , the least squares estimate would not be unique. Because when increase weight on one feature, and decrease it on the other, it would not changing predictions.
+When two features that are collinear, the least squares estimate would not be unique. This is because as long as the sum of the weights of these features remains the same, we wouldn't be changing the predictions, but that also means we can change the weights in (infinitely) many was without changing the predictions, so there wouldn't be a unique minimum.
 
 \item 
-
-  \begin{verbatim}
-The computational complexity of cllosed-form is W = (X0'*X0)/(X0'*y). 
-The runtime of  (X0'*X0) is O(np^2). And, the runtime of  (X0'*y)  is O(np). 
-The runtime of solving W is O(p^3).
-The total runtime  = O(p^3) +O(np^2) + O(np).
-Since O(np^2) domidate O(np) , and in generl n>p, therefore, total runtime = O(np^2).
-  \end{verbatim}
+The computation needed for closed-form is \texttt{W = (X0'*X0)/(X0'*y)}. 
+The runtime of  \texttt{(X0'*X0)} is $O(np^2)$, the runtime of \texttt{(X0'*y)} is $O(np)$ and  
+the runtime of solving \texttt{W} is $O(p^3)$, so the total runtime  = $O(p^3) +O(np^2) + O(np)$.
+Since $O(np^2)$ domidates $O(np)$ , and in generl $n>p$, therefore, total runtime = $O(np^2)$.
 
 
 \item
-Regression tree is suitable for data ploted line shows data don't have a continuous line.  
+Regression tree is suitable for data with many clusters (hard to fit one line or curve). Regression trees could split the data into different clusters and run linear regression with least squares on each cluster in the leaves as opposed to running least squares on the whole dataset.
 
 \end{enumerate}
 
@@ -802,10 +798,9 @@ An advantage of gradient-based strategies is that they are able to solve problem
 \item
   \begin{verbatim}
 function leastSquaresObj(w,X,y)
-
-	f = sum(log(exp.(X*w-y)+exp.(y-X*w)))
-	g = X'*((exp.(X*w-y)-exp.(y-X*w))./(exp.(X*w-y)+exp.(y-X*w)))
-	return (f,g)
+    f = sum(log(exp.(X*w-y)+exp.(y-X*w)))
+    g = X'*((exp.(X*w-y)-exp.(y-X*w))./(exp.(X*w-y)+exp.(y-X*w)))
+    return (f,g)
 end
 
   \end{verbatim}
@@ -814,11 +809,10 @@ end
 
 \subsection{Very-Short Answer Questions}
 
-\blu{
 \enum{
-\item In class we considered 4 general strategies for outlier detection (model-based, graph-based, cluster-based, distance-based). Pick two of these and describe whether they would be effective for detecting the outliers in this dataset.
-\item When should we consider using gradient descent to approximate the solution to the least squares problem instead of exactly solving it with the closed form solution? 
-\item Why are we smoothing the absolute value? Why can't we just set the gradient to 0 and solve a linear system?
-}}
+\item 1. Graph-based: this would be effective for this dataset because the dataset is in 2D, which means it's easy to make into a human readable graph. And from the graph we can easily tell where the outliers are in a very short amount of time. Even though labelling might take a while, this data set is relatively small so it's definitely doable. 2. Model-based: it won't work as well because the mean and variance are sensitive to outliers, which we have a lot here. If we use this approach, the mean would likely end up somewhere close to the middle, which means it will only detect some of the outliers at the top but likely not the ones closer to the middle.
+\item When $d$ (number of features) gets too large. This is because the closed form solution takes $O(nd^2+d^3)$ time, so it scales up very quickly as $d$ goes up, due to the squares and cubes, whereas gradient descent takes $O(ndt)$ time so it doesn't scale up as much.
+\item The absolute value graph may not have a point where gradient is 0, as it keeps going down and then back up again in a sharp corner. Due to the discontinuity the gradient at the minimum may actually be undefined so cannot be solved by the gradient method. If we smooth the absolute value though, the sharp corner goes away and the function becomes continuous, which means we can actually find the local min with gradient descent.
+}
 
 \end{document}
