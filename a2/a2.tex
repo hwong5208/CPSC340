@@ -48,29 +48,16 @@
 \maketitle
 \vspace{-4em}
 
+Name: Hang Yee Wong\\
+CS ID: r9i0b
+
+Name: Joanne Chen\\
+CS ID: r0a9
+
 \section{Random Forests}
 
  
  \subsection{Implementation}
- 
-Thefile \emph{vowels.jld} contains a supervised learning dataset where we are trying to predict which of the 11 ``steady-state'' English vowels that a speaker is trying to pronounce.
-
-You are provided with a \texttt{decisionTree} as well as a \texttt{randomTree} function in \emph{decisionTree.jl} (both based on information gain). The random tree model differs from the decision tree model in two ways: 
-it takes a bootstrap sample of the data before fitting and when fitting individual stumps it only considers $\lfloor \sqrt{d} \rfloor$ randomly-chosen features\footnote{The notation $\lfloor x\rfloor$ means the ``floor'' of $x$, or ``$x$ rounded down''.}  
-In other words, \texttt{RandomTree} is the model we discussed in class that is combined to make up a random forest.
-
-If you run \emph{example\_randomTree.jl}, it will fit both models to the dataset, and you will notice that it overfits badly.
-
-\blu{
-\enum{
-\item If you set the \emph{depth} parameter to \emph{Inf}, why do the training functions terminate?
-\item Why doesn't the random tree model have a training error of 0?
-\item Create a function \texttt{randomForest} that takes in hyperparameters \texttt{depth} and \texttt{nTrees} (number of trees), and 
-fits \texttt{nTrees} random trees each with maximum depth \texttt{depth}. For prediction, have all trees predict and then take the mode. Hand in your function. Hint: you can define an array for holding 10 \emph{GenericModel} types using:\\
-\texttt{subModels = Array\{GenericModel\}(10)}.
-\item Using 50 trees, and a depth of $\infty$, report the training and testing error. Compare this to what we got with a single \texttt{DecisionTree} and with a single \texttt{RandomTree}. Are the results what you expected? Discuss. 
-}
-}
 
 \begin{enumerate}
 \item \texttt{decisionTree} and \texttt{randomTree} reach the base case when either the depth becomes 0 or when one of the subtrees is empty. Even when \emph{depth} is \emph{Inf}, our data is still finite so the training functions will reach an empty sub tree at some point, hence terminate.
@@ -128,27 +115,9 @@ Test Error with depth-Inf random forest: 0.167
 
 \subsection{Very-Short Answer Questions}
 
-\blu{\enum{
-\item What is a a disadvantage of using a very-large number of trees in a random forest classifier?
-\item Your random forest classifier has a training error of 0 and a very high test error. Which ones of the following could help performance?
-\enum{
-%\item Increase the number of trees in the forest to improve test accuracy.
-%\item Decrease the number of trees, since they are giving redundant labels.
-\item Increase the maximum depth of the trees in your forest.
-\item Decrease the maximum depth of the trees in your forest.
-\item Increase the amout of data you consider for each tree (Collect more data and use 2n objects instead of n).
-\item Decrease the amount of data you consider for each tree (Use 0.8n objects instead of n).
-\item Increase the number of features you consider for each tree.
-\item Decrease the number of features you consider for each tree.
-}
-\item Suppose that you were training on raw audio segments and trying to recognize vowel sounds. What could you do to encourage the final classifier to be invariant to translation?
-}
-}
-
-
 \begin{enumerate}
 \item the runtime is too high
-\item %TODO 
+\item
     (b) Decrease the maximum depth of the trees in your forest.\\
     (d) Decrease the amount of data you consider for each tree (Use 0.8n objects instead of n).\\
     (f) Decrease the number of features you consider for each tree.\\
@@ -179,16 +148,30 @@ end
  \item The error decreases steadily until the last few iterations, where it remains the same.
  \item Minimum error obtained is 3071 (See Figure \ref{fig:q2_1_3})
 \end{enumerate}
- 
+\vspace{5em}
+
+  \begin{figure}
+    \includegraphics[width=25em]{a2_q2_1_3.png}
+    \caption{Clustering with minimum error at $k=4$ (Q2.1.3)}
+    \label{fig:q2_1_3}
+ \end{figure}
+
  \subsection{Selecting $k$ in k-means}
-  
+
  \enum{
  \item The \emph{kMeansError} function computes the sum of the difference squared between the points and their means, but as we increase $k$, we will get more clusters, so there are more mean points, meaning the each point will become closer to its mean point. So basically this won't work because we're just averaging across less points as we increase $k$, i.e. the 'best' $k$ will always be the number of data points, where \emph{kMeansError} is 0, so \emph{kMeansError} is not a good indicator of what $k$ to choose.
  \item For the same reason above. If we choose $k$ based on the \emph{kMeansError} we get from the test data, we would be setting $k$ to the number of data points of the test set, i.e. we'd be overfitting.
  \item Minimum error is 1156, occuring at $k = 10$. (See Figure \ref{fig:q2_2_3})
  \item From the graph, we can see the biggest change in slope happens between $k=3$ and $k=4$, so either of these values for $k$ can be reasonable. 
  }
- 
+
+ \begin{figure}[h!]
+    \includegraphics[width=25em]{a2_q2_2_3.png}
+    \caption{Min error vs. $k$ Graph (Q2.2.3)}
+    \label{fig:q2_2_3}
+\end{figure}
+
+
  \subsection{$k$-Medians}
  
  \begin{enumerate}
@@ -291,25 +274,6 @@ end
 \item From the graph (Figure \ref{fig:q2_3_4}) it looks like the biggest change in slope occurs at $k=3$ to $k=4$, so we can probably set $k = 4$. From theh previous question we know we can get a reasonable clustering with $k=4$, so yes we are satisfied with the result.
 \end{enumerate}
 
-\subsection{Very-Short Answer Questions}
-
-\enum{
-\item No. As we can see from the results of \texttt{clusterData2.jld} dataset, $k$-means clustering doesn't work very well when there are outliers, and in this specific case, $k$-medians actually works better. In addition, the results of $k$-means largely depend on where we place our intial means, so the performance fo $k$-means can be drastically decreased/increased by choosing bad/good initial means.
-\item If we determine $k$ by minimizing the objective function given above, we would always end up with the maximum $k$, i.e. the number of data points in the dataset. This is not useful at all because we are saying each object is its own cluster, which tells us nothing about the data.
-\item Something like the \texttt{clusterData2} dataset would be a good example, where there are a few outliers to move one of the means to one of the outliers.
-}
-
-% TODO: move figures to better positions in PDF view
-Q2 Figures:
-\begin{figure}
-    \includegraphics[width=30em]{a2_q2_1_3.png}
-    \caption{Clustering with minimum error at $k=4$ (Q2.1.3)}
-    \label{fig:q2_1_3}
-
-    \includegraphics[width=30em]{a2_q2_2_3.png}
-    \caption{Min error vs. $k$ Graph (Q2.2.3)}
-    \label{fig:q2_2_3}
-\end{figure}
 \begin{figure}
     \includegraphics[width=30em]{a2_q2_3_1.png}
     \caption{Clustering with minimum error at $k=4$ (Q2.3.1)}
@@ -328,6 +292,14 @@ Q2 Figures:
     \caption{Min error vs. $k$ Graph (Q2.3.4)}
     \label{fig:q2_3_4}
  \end{figure}
+
+\subsection{Very-Short Answer Questions}
+
+\enum{
+\item No. As we can see from the results of \texttt{clusterData2.jld} dataset, $k$-means clustering doesn't work very well when there are outliers, and in this specific case, $k$-medians actually works better. In addition, the results of $k$-means largely depend on where we place our intial means, so the performance fo $k$-means can be drastically decreased/increased by choosing bad/good initial means.
+\item If we determine $k$ by minimizing the objective function given above, we would always end up with the maximum $k$, i.e. the number of data points in the dataset. This is not useful at all because we are saying each object is its own cluster, which tells us nothing about the data.
+\item Something like the \texttt{clusterData2} dataset would be a good example, where there are a few outliers to move one of the means to one of the outliers.
+}
 
 \section{More Unsupervised Learning}
 
@@ -396,36 +368,14 @@ end
 
 \subsection{Converting to Matrix/Vector/Norm Notation}
 
-Using our standard supervised learning notation ($X$, $y$, $w$)
-express the following functions in terms of vectors, matrices, and norms (there should be no summations or maximums).
-\blu{\enum{
-\item $\sum_{i=1}^n |w^Tx_i - y_i|$.
-\item $\max_{i \in \{1,2,\dots,n\}} |w^Tx_i  - y_i| + \frac{\lambda}{2}\sum_{j=1}^n w_j^2$.
-\item $\sum_{i=1}^n v_i (w^Tx_i - y_i)^2 + \lambda \sum_{j=1}^{d} |w_j|$.
-}}
-You can use $V$ to denote a diagonal matrix that has the values $v_i$ along the diagonal.
-
 \begin{enumerate}
      \item  $ \norm{Xw-y}$
     \item  $ \norm{Xw-y}_\infty +   \frac{\lambda}{2}\norm{w}_2$
     \item  $ (Xw-y)^T V(Xw-y) +   \lambda\norm{w}_1$
- 
 \end{enumerate}
 
 
 \subsection{Minimizing Quadratic Functions as Linear Systems}
-
-Write finding a minimizer $w$ of the functions below as a system of linear equations (using vector/matrix notation and simplifying as much as possible). Note that all the functions below are convex  so finding a $w$ with $\nabla f(w) = 0$ is sufficient to minimiize the functions (but show your work in getting to this point).
-\blu{\enum{
-\item $f(w) = \frac{1}{2}\norm{w-u}^2$.
-\item $f(w) = \frac{1}{2}\norm{w}^2 + w^TX^Ty$ .
-\item $f(w)= \frac{1}{2}\norm{Xw - y}^2 + \frac{1}{2}w^T\Lambda w$.
-\item $f(w) = \frac{1}{2}\sum_{i=1}^n v_i (w^Tx_i - y_i)^2$.
-}}
-Above we assume that $u$ is a $d$ by $1$ vector, and $\Lambda$ is a $d$ by $d$ diagonal matrix with positive entries along the diagonal.
-
-Hint: Once you convert to vector/matrix notation, you can use the results from class to quickly compute these quantities term-wise. As a sanity check for your derivation, make sure that your results have the right dimensions.
-
 
 \begin{enumerate}
      \item  $f(w) = \frac{1}{2}\norm{w-u}^2$\\
@@ -465,32 +415,11 @@ Hint: Once you convert to vector/matrix notation, you can use the results from c
 
 \subsection{Linear Regresion with Bias Variable}
 
-If you run the script \emph{example\_nonLinear}, it will:
-\enum{
-\item Load a one-dimensional regression dataset.
-\item Fit a least-squares linear regression model.
-\item Report the training error.
-\item Report the test error (on a dataset not used for training).
-\item Draw a figure showing the training data and what the linear model looks like.
-}
-Unfortunately, this is an awful model of the data. The average squared training error on the data set is over 28000 (as is the test error), and the figure produced by the demo confirms that the predictions are usually nowhere near the training data:
-%\centerfig{.5}{leastSquares}
-The y-intercept of this data is clearly not zero (it looks like it's closer to $200$), so we should expect to improve performance by adding a \emph{bias} variable, so that our model is
-\[
-y_i = w^Tx_i + w_0.
-\]
-instead of
-\[
-y_i = w^Tx_i.
-\]
-\blu{Write a new function, \emph{leastSquaresBias}, that has the same input/model/predict format as the \emph{leastSquares} function, but that adds a \emph{bias} variable $w_0$. Hand in your new function, the updated plot, and the updated training/test error.}
-
-Hint: recall that adding a bias $w_0$ is equivalent to adding a column of ones to the matrix $X$. Don't forget that you need to do the same transformation in the \emph{predict} function.
-
 \begin{enumerate}
 
 
-\item \begin{verbatim}
+\item See Figure \ref{fig:q4_3}
+\begin{verbatim}
 
 function leastSquaresBias(X,y)
 
@@ -517,13 +446,6 @@ end
 
  \end{verbatim}
 
-
-\begin{figure}[h!]
-  \includegraphics[width=30em,height=7.5cm]{a2_q4_3.png}
-
-\end{figure}
-
-
 \item
  \begin{verbatim}
 Squared train Error with least squares: 3551.346
@@ -534,27 +456,14 @@ Squared test Error with least squares: 3393.869
 \end{enumerate}
 
 
+\begin{figure}[h!]
+    \includegraphics[width=30em,height=7.5cm]{a2_q4_3.png}
+    \caption{Least Squares Bias (Q4.3)}
+    \label{fig:q4_3}
+  \end{figure}
 
-
+\vspace{10em}
 \subsection{Linear Regression with Polynomial Basis}
-
-Adding a bias variable improves the prediction substantially, but the model is still problematic because the target seems to be a \emph{non-linear} function of the input. Write a new function, \emph{leastSquaresBasis(x,y,p)}, that takes a data vector $x$ (i.e., assuming we only have one feature) and the polynomial order $p$. The function should perform a least squares fit based on a matrix $Z$ where each of its rows contains the values $(x_{i})^j$ for $j=0$ up to $p$. E.g., \emph{leastSquaresBasis(x,y,3)} should form the matrix
-\[
-Z = 
-\left[\begin{array}{cccc}
-1 & x_1 & (x_1)^2 & (x_1)^3\\
-1 & x_2 & (x_2)^2 & (x_2)^3\\
-\vdots\\
-1 & x_n & (x_n)^2 & (x_N)^3\\
-\end{array}
-\right],
-\]
-and fit a least squares model based on it.
-\blu{Hand in the new function, and report the training and test error for $p = 0$ through $p= 10$. Explain the effect of $p$ on the training error and on the test error.}
-
-Note: for this question we'll assume $d=1$ (we'll discuss polynomial bases with more input features later in the course).
-
-Hints: To keep the code simple and reduce the chance of having errors, you may want to write a new function \emph{polyBasis} that you can use for transforming both the training and testing data. 
 
 \begin{enumerate}
  
@@ -622,10 +531,6 @@ Squared test Error with p: 10 and least squares: 256.300
 
 \subsection{Manual Search for Optimal Basis}
 
-Polynomials are a flexible class of functions, but there is structure in this data that is not well-modelled by polynomials. Try to find a nonlinear basis that gives the best performance on this dataset in terms of test error. \blu{Report the basis that you use and the training/test score that you achieve}.
-
-Hint: the data seems to have periodic behaviour, and it's possible to obtain training and test errors below 60.
-
 \begin{enumerate}
 \item
  \begin{verbatim}
@@ -682,14 +587,6 @@ Squared test Error with least squares: 368.812
 
 \subsection{Very-Short Answer Questions}
 
-\blu{
-\enum{
-\item In this question, why are we computing the squared error $(y_i -  \hat{y}_i)^2$ and not testing the equality $(y_i = \hat{y}_i)$?
-\item Describe a simple 2-feature ($d=2$) case where the least squares estimate would not be unique.
-\item What is the computational complexity of computing the closed-form (exact) solution to a linear least squares problem where we have one feature ($d = 1$) and use polynomial basis of degree $p$?
-\item  In what circumstance would a regression tree with linear regressions at the leaves be a better choice than a linear least squares regression model?
-}}
-
 \begin{enumerate}
 \item Linear regression is usually for continuous data. It is impossible for line to pass through all the data points so testing equality would result in a practically useless and very high error. And aslo, linear regression is not predicting the exact number.
 \item 
@@ -709,23 +606,9 @@ Regression tree is suitable for data with many clusters (hard to fit one line or
 
 \section{Robust Regression and Gradient Descent}
 
-The script \emph{example\_outliers} loads a one-dimensional regression dataset that has a non-trivial number of `outlier' data points. These points do not fit the general trend of the rest of the data, and pull the least squares model away from the main downward trend that most data points exhibit:
-%\centerfig{.7}{outliers}
-
-
-
-
 \subsection{Weighted Least Squares in One Dimension}
 
-One of the most common variations on least squares is \emph{weighted} least squares. In this formulation, we have a weight $v_i$ for every training example. To fit the model, we minimize the weighted squared error,
-\[
-f(w) =  \frac{1}{2}\sum_{i=1}^n v_i(w^Tx_i - y_i)^2.
-\]
-In this formulation, the model focuses on making the error small for examples $i$ where $v_i$ is high. Similarly, if $v_i$ is low then the model allows a larger error.
-
-Write a model function, \emph{weightedLeastSquares(X,y,v)}, that implements this model (note that a previous question asks you to show how this formulation can be solved as a linear system).
-Apply this model to the data containing outliers, setting $v_i = 1$ for the first $400$ data points and $v_i = 0.1$ for the last $100$ data points (which are the outliers). \blu{Hand in your function and the updated plot}.
-
+See Figure \ref{fig:q5_1}\\
 
   \begin{verbatim}
 
@@ -753,47 +636,20 @@ end
 
 \begin{figure}[h!]
   \includegraphics[width=30em,height=7.5cm]{a2_q5_1.png}
-
+  \caption{Weighted Least Squares (Q5.1)}
+  \label{fig:q5_1}
 \end{figure}
 
 
 
 \subsection{Smooth Approximation to the L1-Norm}
 
-Unfortunately, we typically do not know the identities of the outliers. In situations where we suspect that there are outliers, but we do not know which examples are outliers, it makes sense to use a loss function that is more robust to outliers. In class, we discussed using the sum of absolute values objective,
-\[
-f(w) = \sum_{i=1}^n |w^Tx_i - y_i|.
-\]
-This is less sensitive to outliers than least squares, but it is non-differentiable and harder to optimize. Nevertheless, there are various smooth approximations to the absolute value function that are easy to optimize. One possible approximation is to use the log-sum-exp approximation of the max function\footnote{Other possibilities are the Huber loss, $|r| \approx \sqrt{r^2 + \epsilon}$ for some small $\epsilon$.}
-\[
-|r| \approx \log(\exp(r) + \exp(-r)).
-\]
-%for some parameter $\alpha$. This approximation becomes exact as $\alpha$ goes to $\infty$, but for any fixed $\alpha$ the function will be differentiable.
-Using this approximation, we obtain an objective of the form
-\[
-f(w) = \sum_{i=1}^n  \log\left(\exp(w^Tx_i - y_i) + \exp(y_i - w^Tx_i)\right).
-\]
-which is smooth but less sensitive to outliers than the squared error. \blu{Derive
- the gradient $\nabla f$ of this function with respect to $w$. You should show your work but you do not have to express the final result in matrix notation.}
-
 $\nabla _w(log(exp(w^Tx_i-y_i)+exp(y_i-w^Tx_i))= \frac{x_i(exp(w^Tx_i-y_i)-exp(y_i-w^Tx_i))}{(exp(w^Tx_i-y_i)+exp(y_i-w^Tx_i))ln(e)}$\\
 $\nabla f= \sum\limits_{i=1}^{n}\frac{x_i(exp(w^Tx_i-y_i)-exp(y_i-w^Tx_i))}{(exp(w^Tx_i-y_i)+exp(y_i-w^Tx_i))}$
 
 \subsection{Robust Regression}
 
-The function \emph{example\_gradient} is the same as \emph{example\_outlier}, except that it fits the least squares model using a \emph{gradient descent} method. You'll see that it produces the same fit as we obtained using the normal equations.
-%One advantage of this strategy is that it only costs $O(nd)$ for an iteration of the gradient method, which is faster than forming $X^TX$ which costs $O(nd^2)$. Of course, we need to know the \emph{number} of gradient iterations in order to precisely compare these two strategies, but for now we will assume that the number of gradient iterations is typically often reasonable.
-
-The typical input to a gradient method is a function that, given $w$, returns $f(w)$ and $\nabla f(w)$. See \emph{funObj} in the \emph{leastSquaresGradient} function for an example. Note that \emph{leastSquaresGradient} also has a numerical check that the gradient code is approximately correct, since implementing gradients is often error-prone.\footnote{Though sometimes the numerical gradient checker itself can be wrong. For a lot more on numerical differentiation you can take CPSC 303.}
-
-An advantage of gradient-based strategies is that they are able to solve problems that do not have closed-form solutions, such as the formulation from the previous section. The function \emph{robustRegression} has most of the implementation of a gradient-based strategy for fitting the robust regression model under the log-sum-exp approximation. The only part missing is the function and gradient calculation inside the \emph{funObj} code. \blu{Modify this function to implement the objective function and gradient based on the smooth approximation to the absolute value function (from the previous section). Hand in your code, as well as the plot obtained using this robust regression appraoch.}
-
 \begin{enumerate}
-
-\begin{figure}[h!]
-  \includegraphics[width=30em,height=7.5cm]{a2_q5_3.png}
-
-\end{figure}
 
 \item
   \begin{verbatim}
@@ -807,6 +663,12 @@ end
 
 \end{enumerate}
 
+\begin{figure}[h!]
+    \includegraphics[width=30em,height=7.5cm]{a2_q5_3.png}
+    \caption{Smooth approximation (Q5.3)}
+    \label{fig:q5_3}
+  \end{figure}
+
 \subsection{Very-Short Answer Questions}
 
 \enum{
@@ -814,15 +676,4 @@ end
 \item When $d$ (number of features) gets too large. This is because the closed form solution takes $O(nd^2+d^3)$ time, so it scales up very quickly as $d$ goes up, due to the squares and cubes, whereas gradient descent takes $O(ndt)$ time so it doesn't scale up as much.
 \item The absolute value graph may not have a point where gradient is 0, as it keeps going down and then back up again in a sharp corner. Due to the discontinuity the gradient at the minimum may actually be undefined so cannot be solved by the gradient method. If we smooth the absolute value though, the sharp corner goes away and the function becomes continuous, which means we can actually find the local min with gradient descent.
 }
-
-
-\begin{enumerate}
-\item  Clusterbased
-\item
-\begin{verbatim}
-  The runtime of closed form is  O(nd^2 +d^3). And the runtime of gradient descent is O(nd). we should consider it when D is large. 
-  \end{verbatim}
-\item Because there are a lot linear systems that we cannot easy to solve it.   
-
-\end{enumerate}
 \end{document}
