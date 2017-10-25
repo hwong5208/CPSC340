@@ -1,0 +1,180 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{listings} % For displaying code
+\usepackage{algorithm2e} % pseudo-code
+
+% Answers
+\def\ans#1{\par\gre{Answer: #1}}
+
+% Colors
+\definecolor{blu}{rgb}{0,0,1}
+\def\blu#1{{\color{blu}#1}}
+\definecolor{gre}{rgb}{0,.5,0}
+\def\gre#1{{\color{gre}#1}}
+\definecolor{red}{rgb}{1,0,0}
+\def\red#1{{\color{red}#1}}
+\def\norm#1{\|#1\|}
+
+% Math
+\def\R{\mathbb{R}}
+\def\argmax{\mathop{\rm arg\,max}}
+\def\argmin{\mathop{\rm arg\,min}}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+\newcommand{\alignStar}[1]{\begin{align*}#1\end{align*}}
+\def\half{\frac 1 2}
+
+% LaTeX
+\newcommand{\fig}[2]{\includegraphics[width=#1\textwidth]{a3f/#2}}
+\newcommand{\centerfig}[2]{\begin{center}\includegraphics[width=#1\textwidth]{a3f/#2}\end{center}}
+\newcommand{\matCode}[1]{\lstinputlisting[language=Matlab]{a3f/#1.m}}
+\def\items#1{\begin{itemize}#1\end{itemize}}
+\def\enum#1{\begin{enumerate}#1\end{enumerate}}
+
+
+\begin{document}
+
+\title{CPSC 340 Assignment 3 (due November 3 ATE)}
+\author{}
+\date{}
+\maketitle
+\vspace{-4em}
+
+
+
+\section{Convex Functions}
+
+Recall that convex loss functions are typically easier to minimize than non-convex functions, so it's important to be able to identify whether a function is convex.
+
+\blu{Show that the following functions are convex}:
+
+\enum{
+\item $f(w) = \alpha w^2 - \beta w + \gamma$ with $w \in \R, \alpha \geq 0, \beta \in R, \gamma \in R$ (1D quadratic).
+\item $f(w) = w\log(w) $ with $w > 0$ (``neg-entropy'')
+\item $f(w) = \norm{Xw-y}^2 + \lambda\norm{w}_1$ with $w \in \R^d, \lambda \geq 0$ (L1-regularized least squares).
+\item $f(w) = \sum_{i=1}^n \log(1+\exp(-y_iw^Tx_i)) $ with $w \in \R^d$ (logistic regression).
+\item $f(w,w_0) = \sum_{i=1}^N\max\{0,w_0 - w^Tx_i\} - w_0 + \frac{\lambda}{2}\norm{w}_2^2$  with $w \in R^d, w_0 \in \R, \lambda \geq 0$ (``1-class'' SVM).
+}
+
+Hint: for the first two you can use the second-derivative test since they are one-dimensional. For the last 3 you'll have to use some of the results in class regarding how combining convex functions  can yield convex functions. For the logistic regression case, a similar case would be showing that $\log(\exp(x))$ is convex even though $\log(x)$ is a concave function.
+
+
+
+\section{Gaussian RBFs and Regularization}
+
+Unfortunately, in practice we often don't know what basis to use. However, if we have enough data then we can make up for this by using a basis that is flexible enough to model any reasonable function. These may perform poorly if we don't have much data, but can perform almost as well as the optimal basis as the size of the dataset grows. In this question you will explore using Gaussian radial basis functions (RBFs), which have this property. These RBFs depend on a parameter $\sigma$, which (like $p$ in the polynomial basis) can be chosen using a validation set. In this question, you will also see how cross-validation allows you to tune parameters of the model on a larger dataset than a strict training/validation split would allow.
+
+\subsection{Regularization}
+
+If you run the demo \emph{example\_RBF.jl}, it will load a dataset and split the training examples into a ``train" and a ``validation" set (it does this randomly since the data is sorted). It will then search for the best value of $\sigma$ for the RBF basis. Once it has the ``best" value of $\sigma$, it re-trains on the entire dataset and reports the training error on the full training set as well as the error on the test set.
+
+A strange behaviour appears: if you run the script more than once it might choose different values of $\sigma$. Sometimes it chooses a large value of $\sigma$ that follows the general trend but misses the oscillations. Other times it sets $\sigma = 1$ or $\sigma=2$, which fits the oscillations better but overfits and gives a much higher test error. \blu{Modify the \emph{leastSquaresRBF} function so that it allows a regularization parameter $\lambda$ and it fits the model with L2-regularization. Hand in your code, and report and describe how the performance changes if you use a regularized estimate with $\lambda = 10^{-12}$ (a very small value).}
+
+
+
+\subsection{Cross-Validation}
+
+While the method rarely performs too badly with regularization, but it's clear that the randomization of the training/validation sets has an effect on the value of $\sigma$ that we choose. This variability would be reduced if we had a larger ``train" and ``validation" set, and one way to simulate this is with \emph{cross-validation}. \blu{Modify the training/validation procedure to use 10-fold cross-validation to select $\sigma$, and hand in your code. How does this change the performance when fixing $\lambda = 10^{-12}$?}\footnote{In practice, we typically use cross-validation to choose both $\sigma$ and $\lambda$}
+
+\subsection{Cost of Non-Parametric Bases}
+
+When dealing with larger datasets, an important issue is the dependence of the computational cost on the number of training examples $n$ and the number of features $d$. 
+\blu{
+\enum{
+\item What is the cost in big-O notation of training a linear regression model with Gaussian RBFs on $n$ training examples with $d$ features (for fixed $\sigma$ and $\lambda$)? 
+\item What is the cost of classifying $t$ new examples with this model? 
+\item When is it cheaper to train using Gaussian RBFs than using the basic linear basis? 
+\item When is it cheaper to test using Gaussian RBFs than using the basic linear basis?
+}}
+
+
+\section{Logistic Regression with Sparse Regularization}
+
+If you run the function \emph{example\_logistic.jl}, it will:
+\enum{
+\item Load a binary classification dataset containing a training and a validation set.
+\item ``Standardize'' the columns of $X$ and add a bias variable.
+\item Apply the same transformation to $Xvalidate$.
+\item Fit a least squares model, using the sign of $w^Tx_i$ to make predictions.
+\item Report the number of features selected by the model (number of non-zero regression weights).
+\item Report the error on the training and validation sets.
+}
+Least squares does ok as a binary classifier on this dataset, but it uses all the features (even though only the prime-numbered features are relevant) and the validation error is above the minimum achievable for this model (which is 1 percent, if you have enough data and know which features are relevant). In this question, you will modify this demo to use different forms of regularization to improve on these aspects.
+
+
+\subsection{Logistic Regression}
+
+Instead of least squares, modify the script to use logistic regression. You can use the \emph{logReg.jl} file, which implements the training and prediction function for a logistic regresion classifier (using a  version of the \emph{findMin} function that does derivative checking for you and that uses more-clever choices of step-sizes). When you switch to using logistic regression, \blu{report how the following quantities change: the training error, validation error, and number of features}.
+
+\subsection{L2-Regularization}
+
+Make a new function, \emph{logRegL2}, that takes an input parameter $\lambda$ and fits a logistic regression model with L2-regularization. Specifically, while \emph{logReg} computes $w$ by minimizing
+\[
+f(w) = \sum_{i=1}^n \log(1+\exp(-y_iw^Tx_i)),
+\]
+your new function \emph{logRegL2} should compute $w$ by minimizing
+\[
+f(w) = \sum_{i=1}^n \left[\log(1+\exp(-y_iw^Tx_i))\right] + \frac{\lambda}{2}\norm{w}^2.
+\]
+\blu{Hand in the objective function that your updated code minimizes, and using $\lambda=1.0$ report how the following quantities change: the training error, the validation error, the number of features used, and the number of gradient descent iterations.}
+
+
+
+
+\subsection{L1-Regularization}
+
+Make a new function, \emph{logRegL1}, that takes an input parameter $\lambda$ and fits a logistic regression model with L1-regularization,
+\[
+f(w) = \sum_{i=1}^n \left[\log(1+\exp(-y_iw^Tx_i))\right] + \lambda\norm{w}_1.
+\]
+\blu{Hand in your \emph{logRegL1} code. Using this new code and $\lambda=1$, report the following quantities: the training error, the validation error, and the number of features the model uses.}
+
+
+You should use the function \emph{findMinL1}, which implements a proximal-gradient method to minimize the sum of a differentiable function $g$ and $\lambda\norm{w}_1$,
+\[
+f(w) = g(w) + \lambda \norm{w}_1.
+\]
+ This function has a similar interface to \emph{findMin}, except that you (a) only provide the code to compute the function/gradient of the differentiable part $g$ and (b) need to provide the value $\lambda$. 
+
+
+\subsection{L0-Regularization}
+
+The function \emph{logRegL0} contains part of the code needed to implement the \emph{forward selection} algorithm, which approximates the solution with L0-regularization,
+\[
+f(w) =  \sum_{i=1}^n \left[\log(1+\exp(-y_iw^Tx_i))\right] + \lambda\norm{w}_0.
+\]
+The `for' loop in this function is missing the part where we fit the model using the subset \emph{Sj}, then compute the score and updates the \emph{minScore/minS}. Modify the `for' loop in this code so that it fits the model using only the features \emph{Sj}, computes the score above using these features, and updates the \emph{minScore/minS} variables (if you want to turn off the diagonistics generated by\emph{findMin}, you can use \emph{verbose = false}).\footnote{Note that Julia doesn't like when you re-define functions, but if you change the variable \emph{Xs} it will actually change the behaviour of the \emph{funObj} that is already defined.}
+\blu{Hand in your updated code. Using this new code, set $\lambda = 1$ and report: the training error, the validation error, and the number of features used.}
+
+Note that the code differs a bit from what we discussed in class, since we assume that the first feature is the bias variable and assume that the bias variable is always included. Also, note that for this particular case using the L0-norm with $\lambda=1$ is equivalent to what is known as the Akaike information criterion (BIC) for variable selection.
+
+
+
+
+\section{Very-Short Answer Questions}
+
+\enum{
+\item Why would you use a score BIC instead of a validation error for feature selection?
+\item Why do we use forward selection instead of exhaustively search all subsets in search and score methods?
+\item In L2-regularization, how does $\lambda$ relate to the two parts of the fundamental trade-off?
+\item Give one reason why one might chose to use L1 regularization over L2 and give one reason for the reverse case.
+\item If we have a feature selection method that tends to have many false negatives (it misses many relevant variables), describe an ensemble feature selection method that could decrease the number of false negatives.
+\item What is the main problem with using least squares to fit a linear model for binary classification?
+\item For a linearly-separable binary classification problem, how does an SVM classifier differ from a classifier found using the perceptron algorithm?
+\item When $d >> n$, why do we use the polynomial kernel to implement the polynomial basis?
+\item Which of the following methods produce linear classifiers? (a) binary least squares as in Question 3, (b) the perceptron algorithm, (c) SVMs, and (d) logistic regression.
+}
+
+Hints: we're looking for short and concise 1-sentence answers, not long and complicated answers. Also, there is roughly 1 question per lecture.
+
+
+
+\end{document}
