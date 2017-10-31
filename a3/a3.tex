@@ -187,19 +187,15 @@ Useing $\lambda = 1$, the training error is 0.0, the validation error is 0.018, 
 \section{Very-Short Answer Questions}
 
 \enum{
-\item Why would you use a score BIC instead of a validation error for feature selection?
-\item Why do we use forward selection instead of exhaustively search all subsets in search and score methods?
-\item In L2-regularization, how does $\lambda$ relate to the two parts of the fundamental trade-off?
-\item Give one reason why one might chose to use L1 regularization over L2 and give one reason for the reverse case.
-\item If we have a feature selection method that tends to have many false negatives (it misses many relevant variables), describe an ensemble feature selection method that could decrease the number of false negatives.
-\item What is the main problem with using least squares to fit a linear model for binary classification?
-\item For a linearly-separable binary classification problem, how does an SVM classifier differ from a classifier found using the perceptron algorithm?
-\item When $d >> n$, why do we use the polynomial kernel to implement the polynomial basis?
-\item Which of the following methods produce linear classifiers? (a) binary least squares as in Question 3, (b) the perceptron algorithm, (c) SVMs, and (d) logistic regression.
+\item Using validation error to choose the number of features often results in overfitting, i.e. too many features are selected, since selecting more features isn't penalized and it usually means a better fit. We use a score BIC instead to make sure selecting too many features is penalized in proportion to the number of samples we have so that our classifier returns a reasonable subset of features.
+\item Exhaustively searching through all the subsets takes exponential time, which is very expensive, so we go for a greedy approach, i.e. forward selection, that only takes polynomial time and produces a result that may not be optimal but would be good enough.
+\item A small $\lambda$ means most of the result is determined by the objective function value, so it would result in a relatively small train error and large test error. A large $\lambda$ reduces overfitting as it places more weight on the penalization for feature selection, so it results in a larger train error but smaller test error.
+\item For L1: L1 comes with feature selection. For L2: L2 has a closed-form unique solution (easier to solve)
+\item Run the feature selection method on the bootstrap samples of the training data and take the intersection of the features selected in all bootstrap samples.
+\item 'Being too right' is penalized significantly by least squares. E.g. if the labels are 1 and -1, $y_i$ is 1 and the classifier produces 100, which is correct, the error would be higher than if the classifer produces an incorrect result that's closer to the label, e.g. -2.
+\item The SVM classifier maximizes the margin of the line so that changes to data points closer to the line would be likely to be classified correctly. The perceptron algorithm doesn't do that.
+\item Polynomial basis increases exponentially with the number of features, so training and predicting data with a lot of features become very expensive very fast. We use the polynomial kernel to solve this as it allows us to compute $y$ wihtout the $Z$ matrix, using just $X$ so we won't need to store and compute all the term interactions needed in $Z$.
+\item Which of the following methods produce linear classifiers? (a) binary least squares as in Question 3, (b) the perceptron algorithm, (c) SVMs, and (d) logistic regression. All of them. (TODO)
 }
-
-Hints: we're looking for short and concise 1-sentence answers, not long and complicated answers. Also, there is roughly 1 question per lecture.
-
-
 
 \end{document}
