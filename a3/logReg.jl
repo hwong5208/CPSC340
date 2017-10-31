@@ -28,6 +28,62 @@ function logisticObj(w,X,y)
 	return (f,g)
 end
 
+function logisticObjL1(w,X,y,lambda)
+	yXw = y.*(X*w)
+	f = sum(log.(1 + exp.(-yXw))) + lambda*sum(abs.(w))
+	g = -X'*(y./(1+exp.(yXw))) + lambda
+	return (f,g)
+end
+
+function logRegL1(X,y,lambda)
+
+	(n,d) = size(X)
+
+	# Initial guess
+	w = zeros(d,1)
+
+	# Function we're going to minimize (and that computes gradient)
+	funObj(w) = logisticObjL1(w,X,y,lambda)
+
+	# Solve least squares problem
+	w = findMinL1(funObj,w,lambda)
+
+
+	# Make linear prediction function
+	predict(Xhat) = sign.(Xhat*w)
+
+	# Return model
+	return LinearModel(predict,w)
+end
+
+function logisticObjL2(w,X,y,lambda)
+	yXw = y.*(X*w)
+	f = sum(log.(1 + exp.(-yXw))) + (lambda/2)*sum(w.*w)
+	g = -X'*(y./(1+exp.(yXw))) + lambda*w
+	return (f,g)
+end
+
+function logRegL2(X,y,lambda)
+
+	(n,d) = size(X)
+
+	# Initial guess
+	w = zeros(d,1)
+
+	# Function we're going to minimize (and that computes gradient)
+	funObj(w) = logisticObjL2(w,X,y,lambda)
+
+	# Solve least squares problem
+	w = findMin(funObj,w,derivativeCheck=true)
+
+
+	# Make linear prediction function
+	predict(Xhat) = sign.(Xhat*w)
+
+	# Return model
+	return LinearModel(predict,w)
+end
+
 # Variant where we use forward selection for feature selection
 function logRegL0(X,y,lambda)
 	(n,d) = size(X)
@@ -68,6 +124,22 @@ function logRegL0(X,y,lambda)
 			Xs = X[:,Sj]
 
 			# PUT YOUR CODE HERE
+			ds = size(Xs, 2)
+			ws = zeros(ds, 1)
+
+			# fit model
+			funObj(ws) = logisticObj(ws,Xs,y)
+			ws = findMin(funObj,ws,verbose=false)
+
+			# compute score
+			yXw = y.*(Xs*ws)
+			score = sum(log.(1 + exp.(-yXw))) + lambda*ds
+
+			# update min
+			if score < minScore
+				minScore = score
+				minS = Sj
+			end
 		end
 		S = minS
 	end

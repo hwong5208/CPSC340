@@ -98,66 +98,91 @@ When dealing with larger datasets, an important issue is the dependence of the c
 
 \section{Logistic Regression with Sparse Regularization}
 
-If you run the function \emph{example\_logistic.jl}, it will:
-\enum{
-\item Load a binary classification dataset containing a training and a validation set.
-\item ``Standardize'' the columns of $X$ and add a bias variable.
-\item Apply the same transformation to $Xvalidate$.
-\item Fit a least squares model, using the sign of $w^Tx_i$ to make predictions.
-\item Report the number of features selected by the model (number of non-zero regression weights).
-\item Report the error on the training and validation sets.
-}
-Least squares does ok as a binary classifier on this dataset, but it uses all the features (even though only the prime-numbered features are relevant) and the validation error is above the minimum achievable for this model (which is 1 percent, if you have enough data and know which features are relevant). In this question, you will modify this demo to use different forms of regularization to improve on these aspects.
-
-
 \subsection{Logistic Regression}
 
-Instead of least squares, modify the script to use logistic regression. You can use the \emph{logReg.jl} file, which implements the training and prediction function for a logistic regresion classifier (using a  version of the \emph{findMin} function that does derivative checking for you and that uses more-clever choices of step-sizes). When you switch to using logistic regression, \blu{report how the following quantities change: the training error, validation error, and number of features}.
+Using least squares the train error, validation error, and number of features are: 0.038, 0.106, 101 respectively. Using logistic regression the train error, validation error, and number of features are: 0.0, 0.082, 101 respectively. From the results, we can see that both the train and validation errors go down when we switch to logistic regression, but the number of features selected remains the same.
 
 \subsection{L2-Regularization}
 
-Make a new function, \emph{logRegL2}, that takes an input parameter $\lambda$ and fits a logistic regression model with L2-regularization. Specifically, while \emph{logReg} computes $w$ by minimizing
-\[
-f(w) = \sum_{i=1}^n \log(1+\exp(-y_iw^Tx_i)),
-\]
-your new function \emph{logRegL2} should compute $w$ by minimizing
-\[
-f(w) = \sum_{i=1}^n \left[\log(1+\exp(-y_iw^Tx_i))\right] + \frac{\lambda}{2}\norm{w}^2.
-\]
-\blu{Hand in the objective function that your updated code minimizes, and using $\lambda=1.0$ report how the following quantities change: the training error, the validation error, the number of features used, and the number of gradient descent iterations.}
+\begin{verbatim}
+function logisticObjL2(w,X,y,lambda)
+    yXw = y.*(X*w)
+    f = sum(log.(1 + exp.(-yXw))) + (lambda/2)*sum(w.*w)
+    g = -X'*(y./(1+exp.(yXw))) + lambda*w
+    return (f,g)
+end
 
+function logRegL2(X,y,lambda)
+    (n,d) = size(X)
+    w = zeros(d,1)
 
+    funObj(w) = logisticObjL2(w,X,y,lambda)
+    w = findMin(funObj,w,derivativeCheck=true)
 
+    predict(Xhat) = sign.(Xhat*w)
+    return LinearModel(predict,w)
+end
+\end{verbatim}
+Using $\lambda = 1$:
+Trainig error is increased to 0.002.
+Validation error is decreased to 0.074.
+Number of features and gradient descent iterations are the same (101 and 30 respectively).
 
 \subsection{L1-Regularization}
 
-Make a new function, \emph{logRegL1}, that takes an input parameter $\lambda$ and fits a logistic regression model with L1-regularization,
-\[
-f(w) = \sum_{i=1}^n \left[\log(1+\exp(-y_iw^Tx_i))\right] + \lambda\norm{w}_1.
-\]
-\blu{Hand in your \emph{logRegL1} code. Using this new code and $\lambda=1$, report the following quantities: the training error, the validation error, and the number of features the model uses.}
+\begin{verbatim}
+function logisticObjL1(w,X,y,lambda)
+    yXw = y.*(X*w)
+    f = sum(log.(1 + exp.(-yXw))) + lambda*sum(abs.(w))
+    g = -X'*(y./(1+exp.(yXw))) + lambda
+    return (f,g)
+end
 
+function logRegL1(X,y,lambda)
+    (n,d) = size(X)
+    w = zeros(d,1)
 
-You should use the function \emph{findMinL1}, which implements a proximal-gradient method to minimize the sum of a differentiable function $g$ and $\lambda\norm{w}_1$,
-\[
-f(w) = g(w) + \lambda \norm{w}_1.
-\]
- This function has a similar interface to \emph{findMin}, except that you (a) only provide the code to compute the function/gradient of the differentiable part $g$ and (b) need to provide the value $\lambda$. 
+    funObj(w) = logisticObjL1(w,X,y,lambda)
+    w = findMinL1(funObj,w,lambda)
+
+    predict(Xhat) = sign.(Xhat*w)
+    return LinearModel(predict,w)
+end
+\end{verbatim}
+ Using $\lambda = 1$: Training error is 0.002, validation error is 0.056, number of features selected is 72.
 
 
 \subsection{L0-Regularization}
 
-The function \emph{logRegL0} contains part of the code needed to implement the \emph{forward selection} algorithm, which approximates the solution with L0-regularization,
-\[
-f(w) =  \sum_{i=1}^n \left[\log(1+\exp(-y_iw^Tx_i))\right] + \lambda\norm{w}_0.
-\]
-The `for' loop in this function is missing the part where we fit the model using the subset \emph{Sj}, then compute the score and updates the \emph{minScore/minS}. Modify the `for' loop in this code so that it fits the model using only the features \emph{Sj}, computes the score above using these features, and updates the \emph{minScore/minS} variables (if you want to turn off the diagonistics generated by\emph{findMin}, you can use \emph{verbose = false}).\footnote{Note that Julia doesn't like when you re-define functions, but if you change the variable \emph{Xs} it will actually change the behaviour of the \emph{funObj} that is already defined.}
-\blu{Hand in your updated code. Using this new code, set $\lambda = 1$ and report: the training error, the validation error, and the number of features used.}
+Code snippit: (please refer to \texttt{logReg.jl} for the whole function)
+\begin{verbatim}
+for j in setdiff(1:d,S)
+    # Fit the model with 'j' added to the feature set 'S'
+    # then compute the score and update 'minScore' and 'minS'
+    Sj = [S;j]
+    Xs = X[:,Sj]
 
-Note that the code differs a bit from what we discussed in class, since we assume that the first feature is the bias variable and assume that the bias variable is always included. Also, note that for this particular case using the L0-norm with $\lambda=1$ is equivalent to what is known as the Akaike information criterion (BIC) for variable selection.
+    # PUT YOUR CODE HERE
+    ds = size(Xs, 2)
+    ws = zeros(ds, 1)
 
+    # fit model
+    funObj(ws) = logisticObj(ws,Xs,y)
+    ws = findMin(funObj,ws,verbose=false)
 
+    # compute score
+    yXw = y.*(Xs*ws)
+    score = sum(log.(1 + exp.(-yXw))) + lambda*ds
 
+    # update min
+    if score < minScore
+        minScore = score
+        minS = Sj
+    end
+end
+\end{verbatim}
+
+Useing $\lambda = 1$, the training error is 0.0, the validation error is 0.018, and the number of features selected is 24 (and they're all prime numbers, as expected).
 
 \section{Very-Short Answer Questions}
 
