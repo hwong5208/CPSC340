@@ -66,6 +66,26 @@ Recall that convex loss functions are typically easier to minimize than non-conv
 
 Hint: for the first two you can use the second-derivative test since they are one-dimensional. For the last 3 you'll have to use some of the results in class regarding how combining convex functions  can yield convex functions. For the logistic regression case, a similar case would be showing that $\log(\exp(x))$ is convex even though $\log(x)$ is a concave function.
 
+\enum{
+\item $f(w) = \alpha w^2 - \beta w + \gamma$\\
+         $f'(w) = 2\alpha w  - \beta $\\
+          $f''(w) = \alpha w   >0  $
+\item $f(w) = w\log(w) $ with $w > 0$\\ 
+       $f'(w) = w(\frac{1}{w})+ \log(w) $\\
+       $f'(w) = 1+ \log(w) $ \\
+       $f''(w) = \frac{1}{w}  >0 $
+\item $f(w) = \norm{Xw-y}^2 + \lambda\norm{w}_1$ \\
+        we have $ \norm{Xw-y}^2$ is a convex function because it is norm.\\
+       And also, $\lambda\norm{w}_1$  is a convex function because it is norm and $\lambda \geq 0$.\\ Therefore, $\lambda\norm{w}_1$ is convex. The $f(w)$ is two sum of convex funciton so it is convex. 
+\item $f(w) = \sum_{i=1}^n \log(1+\exp(-y_iw^Tx_i))$\\
+      Let  $g(z) = \log(1+\exp(Z))$\\
+        $g'(z) = \frac{exp(z)}{1+exp(z)}$\\
+         $g'(z) = \frac{1}{1+exp(-z)}$\\
+        $g''(z) =  \frac{exp(-z)}{(1+exp(-z))^2}   > 0 $
+\item $f(w,w_0) = \sum_{i=1}^N\max\{0,w_0 - w^Tx_i\} - w_0 + \frac{\lambda}{2}\norm{w}_2^2$\\
+        $\max\{0,w_0 - w^Tx_i\} $ is a max of convex function, which  is a convex function.\\ And , $\sum_{i=1}^N\max\{0,w_0 - w^Tx_i\} - w_0  $ is a composition of a convex function and linear function , which is a convex function. $\norm{w}_2^2$ is norm , and $\lambda \geq 0$ Therefore, $ \frac{\lambda}{2}\norm{w}_2^2$\ is convex function.
+Therefore, $f(w)$ is a convex functon.
+}
 
 
 \section{Gaussian RBFs and Regularization}
@@ -78,11 +98,18 @@ If you run the demo \emph{example\_RBF.jl}, it will load a dataset and split the
 
 A strange behaviour appears: if you run the script more than once it might choose different values of $\sigma$. Sometimes it chooses a large value of $\sigma$ that follows the general trend but misses the oscillations. Other times it sets $\sigma = 1$ or $\sigma=2$, which fits the oscillations better but overfits and gives a much higher test error. \blu{Modify the \emph{leastSquaresRBF} function so that it allows a regularization parameter $\lambda$ and it fits the model with L2-regularization. Hand in your code, and report and describe how the performance changes if you use a regularized estimate with $\lambda = 10^{-12}$ (a very small value).}
 
-
+\enum{
+\item After used regularized estimated, sometime it will still choose a larges value of  $\sigma$  that follows the general trend but misses the oscillations. However, when it chose $\sigma = 1$ or $\sigma=2$, it will fits the oscillations better and gives a much lower test error.
+}
 
 \subsection{Cross-Validation}
 
 While the method rarely performs too badly with regularization, but it's clear that the randomization of the training/validation sets has an effect on the value of $\sigma$ that we choose. This variability would be reduced if we had a larger ``train" and ``validation" set, and one way to simulate this is with \emph{cross-validation}. \blu{Modify the training/validation procedure to use 10-fold cross-validation to select $\sigma$, and hand in your code. How does this change the performance when fixing $\lambda = 10^{-12}$?}\footnote{In practice, we typically use cross-validation to choose both $\sigma$ and $\lambda$}
+
+\enum{
+  \item Using cross-validation, almost of the time we will get the best $\sigma$ to 1.
+}
+
 
 \subsection{Cost of Non-Parametric Bases}
 
@@ -94,6 +121,15 @@ When dealing with larger datasets, an important issue is the dependence of the c
 \item When is it cheaper to train using Gaussian RBFs than using the basic linear basis? 
 \item When is it cheaper to test using Gaussian RBFs than using the basic linear basis?
 }}
+
+\enum{
+\item  The training cost of Gaussian RBF is O( $n^2d+n^3$). \\
+         The training cost of  basic linear basis is O( $nd^2+d^3$).
+\item $O(tnd)$
+\item  when $ n < d$
+ \item  RBF are never cheaper to test.
+}
+
 
 
 \section{Logistic Regression with Sparse Regularization}

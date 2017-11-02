@@ -64,12 +64,14 @@ end
 
 
 function leastSquaresRBF(X,y,sigma)
+	lamba = 1/10^(12)
 	(n,d) = size(X)
 
 	Z = rbf(X,X,sigma)
 
-	w = (Z'*Z)\(Z'*y)
 
+ 	w = (Z'*Z+lamba)\(Z'*y)
+ 
 	predict(Xhat) = rbf(Xhat,X,sigma)*w
 
 	return LinearModel(predict,w)
@@ -81,3 +83,4 @@ function rbf(Xhat,X,sigma)
 	D = distancesSquared(Xhat,X)
 	return (1/sqrt(2pi*sigma^2))exp.(-D/(2sigma^2))
 end
+

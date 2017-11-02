@@ -6,28 +6,44 @@ data = load("basisData.jld")
 # Data is sorted, so *randomly* split into train and validation:
 n = size(X,1)
 perm = randperm(n)
-validStart = Int64(n/2+1) # Start of validation indices
-validEnd = Int64(n) # End of validation incides
-validNdx = perm[validStart:validEnd] # Indices of validation examples
-trainNdx = perm[setdiff(1:n,validNdx)] # Indices of training examples
-Xtrain = X[trainNdx,:]
-ytrain = y[trainNdx]
-Xvalid = X[validNdx,:]
-yvalid = y[validNdx]
+#validStart = Int64(n/2+1) # Start of validation indices
+#validEnd = Int64(n) # End of validation incides
+#validNdx = perm[validStart:validEnd] # Indices of validation examples
+#trainNdx = perm[setdiff(1:n,validNdx)] # Indices of training examples
+#trainNdx = perm[setdiff(1:n,validStart:validEnd)] 
+#Xtrain = X[trainNdx,:]
+#ytrain = y[trainNdx]
+#Xvalid = X[validNdx,:]
+#yvalid = y[validNdx]
 
 # Find best value of RBF variance parameter,
 #	training on the train set and validating on the test set
 include("leastSquares.jl")
 minErr = Inf
+nsplits = 10
 bestSigma = []
 for sigma in 2.0.^(-15:15)
+   validError =0
+   for splits in 1:nsplits
+    validStart = Int64(1+(n/nsplits)*(splits-1)) # Start of validation indices
+	validEnd = Int64((n/nsplits)*splits) # End of validation incides
+	validNdx = perm[validStart:validEnd] # Indices of validation examples
+	#trainNdx = perm[setdiff(1:n,validNdx)] # Indices of training examples
+	trainNdx = perm[setdiff(1:n,validStart:validEnd)] 
+	Xtrain = X[trainNdx,:]
+	ytrain = y[trainNdx]
+	Xvalid = X[validNdx,:]
+	yvalid = y[validNdx]
+
 
 	# Train on the training set
 	model = leastSquaresRBF(Xtrain,ytrain,sigma)
 
 	# Compute the error on the validation set
 	yhat = model.predict(Xvalid)
-	validError = sum((yhat - yvalid).^2)/(n/2)
+	#validError = sum((yhat - yvalid).^2)/(n/2)
+    validError = sum((yhat - yvalid).^2)/(n/nsplits)
+ end 
 	@printf("With sigma = %.3f, validError = %.2f\n",sigma,validError)
 
 	# Keep track of the lowest validation error
