@@ -69,22 +69,22 @@ Hint: for the first two you can use the second-derivative test since they are on
 \enum{
 \item $f(w) = \alpha w^2 - \beta w + \gamma$\\
          $f'(w) = 2\alpha w  - \beta $\\
-          $f''(w) = \alpha w   >0  $
+          $f''(w) = 2\alpha   >0  $
 \item $f(w) = w\log(w) $ with $w > 0$\\ 
        $f'(w) = w(\frac{1}{w})+ \log(w) $\\
        $f'(w) = 1+ \log(w) $ \\
        $f''(w) = \frac{1}{w}  >0 $
 \item $f(w) = \norm{Xw-y}^2 + \lambda\norm{w}_1$ \\
         we have $ \norm{Xw-y}^2$ is a convex function because it is norm.\\
-       And also, $\lambda\norm{w}_1$  is a convex function because it is norm and $\lambda \geq 0$.\\ Therefore, $\lambda\norm{w}_1$ is convex. The $f(w)$ is two sum of convex funciton so it is convex. 
-\item $f(w) = \sum_{i=1}^n \log(1+\exp(-y_iw^Tx_i))$\\
+       And also, $\lambda\norm{w}_1$  is a convex function because it is norm and $\lambda \geq 0$.\\ $f(w)$ is the sum of two convex functions so it is also convex. 
+\item Let $g(w) = -y_iw^Tx_i$, $g(w)$ is convex because it is linear.\\
       Let  $g(z) = \log(1+\exp(Z))$\\
         $g'(z) = \frac{exp(z)}{1+exp(z)}$\\
          $g'(z) = \frac{1}{1+exp(-z)}$\\
-        $g''(z) =  \frac{exp(-z)}{(1+exp(-z))^2}   > 0 $
+        $g''(z) =  \frac{exp(-z)}{(1+exp(-z))^2}   > 0 $. So $g(z)$ is also convex, and the composition $g(h(w)) = log(1+exp(-y_iw^Tx_i))$ is also convex. $f(w)$ is the sum of $g(h(w))$ so it is also convex.
 \item $f(w,w_0) = \sum_{i=1}^N\max\{0,w_0 - w^Tx_i\} - w_0 + \frac{\lambda}{2}\norm{w}_2^2$\\
-        $\max\{0,w_0 - w^Tx_i\} $ is a max of convex function, which  is a convex function.\\ And , $\sum_{i=1}^N\max\{0,w_0 - w^Tx_i\} - w_0  $ is a composition of a convex function and linear function , which is a convex function. $\norm{w}_2^2$ is norm , and $\lambda \geq 0$ Therefore, $ \frac{\lambda}{2}\norm{w}_2^2$\ is convex function.
-Therefore, $f(w)$ is a convex functon.
+        $\max\{0,w_0 - w^Tx_i\} $ is a max of convex functions, so it is also a convex function. $\sum_{i=1}^N\max\{0,w_0 - w^Tx_i\} - w_0  $ is a composition of a convex function and linear function, so it is also a convex function. $\norm{w}_2^2$ is a norm and $\lambda \geq 0$, so $ \frac{\lambda}{2}\norm{w}_2^2$\ is convex function.
+Therefore, $f(w)$, the sum of all these convex functions, is a convex functon.
 }
 
 
@@ -173,11 +173,10 @@ When dealing with larger datasets, an important issue is the dependence of the c
 }}
 
 \enum{
-\item  The training cost of Gaussian RBF is O( $n^2d+n^3$). \\
-         The training cost of  basic linear basis is O( $nd^2+d^3$).
-\item $O(tnd)$
-\item  when $ n < d$
- \item  RBF are never cheaper to test.
+\item  The cost to construct the $Z$ matrix is $O(n^2d)$ and the cost of computing the solution $w$ is $O(n^3)$, so the training cost of Gaussian RBF is O($n^2d+n^3$).(TODO)
+\item For each test example, we need to 1) compute the norm of between it and every original data point, which takes $O(nd)$ time, so the total is $O(tnd)$.
+\item  Basic linear basis takes $O(nd^2 + d^3)$ time, so RBF is cheaper when $ n < d$. (TODO)
+ \item  Basic linear basis takes $O(td)$ to test, so it's always cheaper than RBF.
 }
 
 
