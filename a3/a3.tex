@@ -52,28 +52,14 @@
 
 \section{Convex Functions}
 
-Recall that convex loss functions are typically easier to minimize than non-convex functions, so it's important to be able to identify whether a function is convex.
-
-\blu{Show that the following functions are convex}:
-
-\enum{
-\item $f(w) = \alpha w^2 - \beta w + \gamma$ with $w \in \R, \alpha \geq 0, \beta \in R, \gamma \in R$ (1D quadratic).
-\item $f(w) = w\log(w) $ with $w > 0$ (``neg-entropy'')
-\item $f(w) = \norm{Xw-y}^2 + \lambda\norm{w}_1$ with $w \in \R^d, \lambda \geq 0$ (L1-regularized least squares).
-\item $f(w) = \sum_{i=1}^n \log(1+\exp(-y_iw^Tx_i)) $ with $w \in \R^d$ (logistic regression).
-\item $f(w,w_0) = \sum_{i=1}^N\max\{0,w_0 - w^Tx_i\} - w_0 + \frac{\lambda}{2}\norm{w}_2^2$  with $w \in R^d, w_0 \in \R, \lambda \geq 0$ (``1-class'' SVM).
-}
-
-Hint: for the first two you can use the second-derivative test since they are one-dimensional. For the last 3 you'll have to use some of the results in class regarding how combining convex functions  can yield convex functions. For the logistic regression case, a similar case would be showing that $\log(\exp(x))$ is convex even though $\log(x)$ is a concave function.
-
 \enum{
 \item $f(w) = \alpha w^2 - \beta w + \gamma$\\
          $f'(w) = 2\alpha w  - \beta $\\
-          $f''(w) = 2\alpha   >0  $
+          $f''(w) = 2\alpha   >0  $, so it's convex.
 \item $f(w) = w\log(w) $ with $w > 0$\\ 
        $f'(w) = w(\frac{1}{w})+ \log(w) $\\
        $f'(w) = 1+ \log(w) $ \\
-       $f''(w) = \frac{1}{w}  >0 $
+       $f''(w) = \frac{1}{w}  >0 $, so it's convex.
 \item $f(w) = \norm{Xw-y}^2 + \lambda\norm{w}_1$ \\
         we have $ \norm{Xw-y}^2$ is a convex function because it is norm.\\
        And also, $\lambda\norm{w}_1$  is a convex function because it is norm and $\lambda \geq 0$.\\ $f(w)$ is the sum of two convex functions so it is also convex. 
@@ -90,75 +76,63 @@ Therefore, $f(w)$, the sum of all these convex functions, is a convex functon.
 
 \section{Gaussian RBFs and Regularization}
 
-Unfortunately, in practice we often don't know what basis to use. However, if we have enough data then we can make up for this by using a basis that is flexible enough to model any reasonable function. These may perform poorly if we don't have much data, but can perform almost as well as the optimal basis as the size of the dataset grows. In this question you will explore using Gaussian radial basis functions (RBFs), which have this property. These RBFs depend on a parameter $\sigma$, which (like $p$ in the polynomial basis) can be chosen using a validation set. In this question, you will also see how cross-validation allows you to tune parameters of the model on a larger dataset than a strict training/validation split would allow.
-
 \subsection{Regularization}
 
-If you run the demo \emph{example\_RBF.jl}, it will load a dataset and split the training examples into a ``train" and a ``validation" set (it does this randomly since the data is sorted). It will then search for the best value of $\sigma$ for the RBF basis. Once it has the ``best" value of $\sigma$, it re-trains on the entire dataset and reports the training error on the full training set as well as the error on the test set.
-
-A strange behaviour appears: if you run the script more than once it might choose different values of $\sigma$. Sometimes it chooses a large value of $\sigma$ that follows the general trend but misses the oscillations. Other times it sets $\sigma = 1$ or $\sigma=2$, which fits the oscillations better but overfits and gives a much higher test error. \blu{Modify the \emph{leastSquaresRBF} function so that it allows a regularization parameter $\lambda$ and it fits the model with L2-regularization. Hand in your code, and report and describe how the performance changes if you use a regularized estimate with $\lambda = 10^{-12}$ (a very small value).}
-
 \begin{verbatim}
-function leastSquaresRBF(X,y,sigma)
-	lamba = 1/10^(12)
-	(n,d) = size(X)
+function leastSquaresRBF(X,y,sigma,lambda)
+    (n,d) = size(X)
 
-	Z = rbf(X,X,sigma)
+    Z = rbf(X,X,sigma)
 
 
- 	w = (Z'*Z+lamba)\(Z'*y)
- 
-	predict(Xhat) = rbf(Xhat,X,sigma)*w
+    w = (Z'*Z+lambda*eye(n))\(Z'*y)
 
-	return LinearModel(predict,w)
-end
+    predict(Xhat) = rbf(Xhat,X,sigma)*w
 
-function rbf(Xhat,X,sigma)
-	(t,d) = size(Xhat)
-	n = size(X,1)
-	D = distancesSquared(Xhat,X)
-	return (1/sqrt(2pi*sigma^2))exp.(-D/(2sigma^2))
+    return LinearModel(predict,w)
 end
 \end{verbatim}
 
-\enum{
-\item After used regularized estimated, sometime it will still choose a larges value of  $\sigma$  that follows the general trend but misses the oscillations. However, when it chose $\sigma = 1$ or $\sigma=2$, it will fits the oscillations better and gives a much lower test error.
-}
+After adding regularization with $\lambda = 10^{-12}$, the choice of $\sigma$ becomes a bit more stable and it always chooses a relatively small value for $\sigma$, resulting in a smaller test error. (After running a few times, the $\sigma =$ values it picked most often were 1 and 4, and occasiaonally 8, whereas originally the $\sigma$ value could go up to 32 and 64).
 
 \subsection{Cross-Validation}
 
-While the method rarely performs too badly with regularization, but it's clear that the randomization of the training/validation sets has an effect on the value of $\sigma$ that we choose. This variability would be reduced if we had a larger ``train" and ``validation" set, and one way to simulate this is with \emph{cross-validation}. \blu{Modify the training/validation procedure to use 10-fold cross-validation to select $\sigma$, and hand in your code. How does this change the performance when fixing $\lambda = 10^{-12}$?}\footnote{In practice, we typically use cross-validation to choose both $\sigma$ and $\lambda$}
-
 \begin{verbatim}
-minErr = Inf
-nsplits = 10
-bestSigma = []
-for sigma in 2.0.^(-15:15)
-   validError =0
-   for splits in 1:nsplits
-    validStart = Int64(1+(n/nsplits)*(splits-1)) # Start of validation indices
-	validEnd = Int64((n/nsplits)*splits) # End of validation incides
-	validNdx = perm[validStart:validEnd] # Indices of validation examples
-	trainNdx = perm[setdiff(1:n,validStart:validEnd)] 
-	Xtrain = X[trainNdx,:]
-	ytrain = y[trainNdx]
-	Xvalid = X[validNdx,:]
-	yvalid = y[validNdx]
-
-
-	# Train on the training set
-	model = leastSquaresRBF(Xtrain,ytrain,sigma)
-
-	# Compute the error on the validation set
-	yhat = model.predict(Xvalid)
-	#validError = sum((yhat - yvalid).^2)/(n/2)
-    validError = sum((yhat - yvalid).^2)/(n/nsplits)
- end 
+    minErr = Inf
+    nsplits = 10
+    bestSigma = []
+    for sigma in 2.0.^(-15:15)
+            validError =0
+            for splits in 1:nsplits
+                    validStart = Int64(1+(n/nsplits)*(splits-1)) # Start of validation indices
+                    validEnd = Int64((n/nsplits)*splits) # End of validation incides
+                    validNdx = perm[validStart:validEnd] # Indices of validation examples
+                    trainNdx = perm[setdiff(1:n,validStart:validEnd)]
+                    Xtrain = X[trainNdx,:]
+                    ytrain = y[trainNdx]
+                    Xvalid = X[validNdx,:]
+                    yvalid = y[validNdx]
+    
+    
+                    # Train on the training set
+                    model = leastSquaresRBF(Xtrain,ytrain,sigma,1/10^(12))
+    
+                    # Compute the error on the validation set
+                    yhat = model.predict(Xvalid)
+                    validError = sum((yhat - yvalid).^2)/(n/nsplits)
+            end
+            @printf("With sigma = %.3f, validError = %.2f\n",sigma,validError)
+    
+            # Keep track of the lowest validation error
+            if validError < minErr
+                    minErr = validError
+                    bestSigma = sigma
+            end
+    
+    end
 \end{verbatim}
 
-\enum{
-  \item Using cross-validation, almost of the time we will get the best $\sigma$ to 1.
-}
+Using cross-validation, we get $\sigma = 1$, which yields the lowest test error, most of the time. (We got nine 1's and one 0.5 after running it 10 times)
 
 
 \subsection{Cost of Non-Parametric Bases}

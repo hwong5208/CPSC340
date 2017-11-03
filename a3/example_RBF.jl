@@ -23,39 +23,37 @@ minErr = Inf
 nsplits = 10
 bestSigma = []
 for sigma in 2.0.^(-15:15)
-   validError =0
-   for splits in 1:nsplits
-    validStart = Int64(1+(n/nsplits)*(splits-1)) # Start of validation indices
-	validEnd = Int64((n/nsplits)*splits) # End of validation incides
-	validNdx = perm[validStart:validEnd] # Indices of validation examples
-	#trainNdx = perm[setdiff(1:n,validNdx)] # Indices of training examples
-	trainNdx = perm[setdiff(1:n,validStart:validEnd)] 
-	Xtrain = X[trainNdx,:]
-	ytrain = y[trainNdx]
-	Xvalid = X[validNdx,:]
-	yvalid = y[validNdx]
+        validError =0
+        for splits in 1:nsplits
+                validStart = Int64(1+(n/nsplits)*(splits-1)) # Start of validation indices
+                validEnd = Int64((n/nsplits)*splits) # End of validation incides
+                validNdx = perm[validStart:validEnd] # Indices of validation examples
+                trainNdx = perm[setdiff(1:n,validStart:validEnd)]
+                Xtrain = X[trainNdx,:]
+                ytrain = y[trainNdx]
+                Xvalid = X[validNdx,:]
+                yvalid = y[validNdx]
 
 
-	# Train on the training set
-	model = leastSquaresRBF(Xtrain,ytrain,sigma)
+                # Train on the training set
+                model = leastSquaresRBF(Xtrain,ytrain,sigma,1/10^(12))
 
-	# Compute the error on the validation set
-	yhat = model.predict(Xvalid)
-	#validError = sum((yhat - yvalid).^2)/(n/2)
-    validError = sum((yhat - yvalid).^2)/(n/nsplits)
- end 
-	@printf("With sigma = %.3f, validError = %.2f\n",sigma,validError)
+                # Compute the error on the validation set
+                yhat = model.predict(Xvalid)
+                validError = sum((yhat - yvalid).^2)/(n/nsplits)
+        end
+        @printf("With sigma = %.3f, validError = %.2f\n",sigma,validError)
 
-	# Keep track of the lowest validation error
-	if validError < minErr
-		minErr = validError
-		bestSigma = sigma
-	end
+        # Keep track of the lowest validation error
+        if validError < minErr
+                minErr = validError
+                bestSigma = sigma
+        end
 
 end
 
 # Now fit the model based on the full dataset
-model = leastSquaresRBF(X,y,bestSigma)
+model = leastSquaresRBF(X,y,bestSigma,1/10^(12))
 
 # Report the error on the test set
 t = size(Xtest,1)
