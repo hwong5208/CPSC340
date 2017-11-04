@@ -141,15 +141,6 @@ Using cross-validation, we get $\sigma = 1$, which yields the lowest test error,
 
 \subsection{Cost of Non-Parametric Bases}
 
-When dealing with larger datasets, an important issue is the dependence of the computational cost on the number of training examples $n$ and the number of features $d$. 
-\blu{
-\enum{
-\item What is the cost in big-O notation of training a linear regression model with Gaussian RBFs on $n$ training examples with $d$ features (for fixed $\sigma$ and $\lambda$)? 
-\item What is the cost of classifying $t$ new examples with this model? 
-\item When is it cheaper to train using Gaussian RBFs than using the basic linear basis? 
-\item When is it cheaper to test using Gaussian RBFs than using the basic linear basis?
-}}
-
 \enum{
 \item  The cost to construct the $Z$ matrix is $O(n^2d)$, the cost to construct the linear system is $O(n^3)$ and the cost of computing the solution $w$ is $O(n^3)$, so the training cost of Gaussian RBF is O($n^2d+n^3$).
 \item For each test example, we need to 1) compute the norm of between it and every original data point, which takes $O(nd)$ time, so the total is $O(tnd)$.
