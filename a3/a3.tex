@@ -147,9 +147,9 @@ When dealing with larger datasets, an important issue is the dependence of the c
 }}
 
 \enum{
-\item  The cost to construct the $Z$ matrix is $O(n^2d)$ and the cost of computing the solution $w$ is $O(n^3)$, so the training cost of Gaussian RBF is O($n^2d+n^3$).(TODO)
+\item  The cost to construct the $Z$ matrix is $O(n^2d)$, the cost to construct the linear system is $O(n^3)$ and the cost of computing the solution $w$ is $O(n^3)$, so the training cost of Gaussian RBF is O($n^2d+n^3$).
 \item For each test example, we need to 1) compute the norm of between it and every original data point, which takes $O(nd)$ time, so the total is $O(tnd)$.
-\item  Basic linear basis takes $O(nd^2 + d^3)$ time, so RBF is cheaper when $ n < d$. (TODO)
+\item  The cost to construct the Z matrix is $O(nd)$, the cost to construct the linear system is $O(nd^2)$, and the cost to solve the linear equations is $O(d^3)$, so basic linear basis takes $O(nd^2 + d^3)$ time, so RBF is cheaper when $ n < d$.
  \item  Basic linear basis takes $O(td)$ to test, so it's always cheaper than RBF.
 }
 
@@ -254,7 +254,7 @@ Useing $\lambda = 1$, the training error is 0.0, the validation error is 0.018, 
 \item 'Being too right' is penalized significantly by least squares. E.g. if the labels are 1 and -1, $y_i$ is 1 and the classifier produces 100, which is correct, the error would be higher than if the classifer produces an incorrect result that's closer to the label, e.g. -2.
 \item The SVM classifier maximizes the margin of the line so that changes to data points closer to the line would be likely to be classified correctly. The perceptron algorithm doesn't do that.
 \item Polynomial basis increases exponentially with the number of features, so training and predicting data with a lot of features become very expensive very fast. We use the polynomial kernel to solve this as it allows us to compute $y$ wihtout the $Z$ matrix, using just $X$ so we won't need to store and compute all the term interactions needed in $Z$.
-\item Which of the following methods produce linear classifiers? (a) binary least squares as in Question 3, (b) the perceptron algorithm, (c) SVMs, and (d) logistic regression. All of them. (TODO)
+\item They all have linear prediction functions and they all 'split' the data points into two groups (in the transformed space), so they're all linear classifiers.
 }
 
 \end{document}
