@@ -51,3 +51,50 @@ function logRegOnevsAll(X,y)
 
 	return LinearModel(predict,W)
 end
+
+function softmaxObj(w,X,y,k)
+        (n,d) = size(X)
+        W = reshape(w,d,k)
+        f = 0
+        g = zeros(d,k)
+
+        partial = function(j,c)
+                total = 0
+                for i in 1:n
+                        term1 = y[i] == c ? 1 : 0
+                        term2 = exp(W[:,c]'*X[i,:]) / sum(exp.(X[i,:]'*W))
+                        total += X[i,j]*(term2-term1)
+                end
+                return total
+        end
+
+        for i in 1:n
+                f += -W[:,y[i]]'*X[i,:] + log(sum(exp.(X[i,:]'*W)))
+        end
+
+        for j in 1:d
+                for c in 1:k
+                        g[j,c] = partial(j,c)
+                end
+        end
+
+        return (f,reshape(g,d*k,1))
+end
+
+function softmaxClassifier(X,y)
+        (n,d) = size(X)
+        k = maximum(y)
+
+        W = zeros(d,k)
+        Wp = reshape(W,d*k,1)
+
+        funObj(w) = softmaxObj(w,X,y,k)
+
+        Wp = findMin(funObj,Wp,derivativeCheck=true,verbose=false)
+        W = reshape(Wp,d,k);
+        @show(W)
+
+        predict(Xhat) = mapslices(indmax,Xhat*W,2)
+
+        return LinearModel(predict,W)
+end

@@ -50,61 +50,76 @@
 
 \section{Multi-Class Logistic}
 
-The function \emph{example\_multiClass} loads a multi-class classification datasetwith $y_i \in \{1,2,3,4,5\}$ and fits a `one-vs-all' classification model using binary logistic regression, then reports the validation error and shows a plot of the data/classifier. The performance on the validation set is ok, but could be much better. For example, this classifier never even predicts that examples will be in class 1 (the green class).
-
 \subsection{Softmax Classification}
 
-Linear classifiers make their decisions by finding the class label $c$ maximizing the quantity $w_c^Tx_i$, so we want to train the model to make $w_{y_i}^Tx_i$ larger than $w_{c'}^Tx_i$ for all the classes $c'$ that are not $y_i$. 
-Here $c$ is a possible label and $w_{c'}$ is column $c'$ of $W$. Similarly, $y_i$ is the training label, $w_{y_i}$ is column $y_i$ of $W$, and in this setting we are assuming a discrete label $y_i \in \{1,2,\dots,k\}$. Before we move on to implementing the softmax classifier to fix the issues raised in the introduction, let's do a simple example:
-
-Consider the dataset below, which has $10$ training examples, $2$ features, and $3$ class labels:
-\[
-X = \begin{bmatrix}0 & 1\\1 & 0\\ 1 & 0\\ 1 & 1\\ 1 & 1\\ 0 & 0\\  1 & 0\\  1 & 0\\  1 & 1\\  1 &0\end{bmatrix}, \quad y = \begin{bmatrix}1\\1\\1\\2\\2\\2\\3\\3\\3\\3\end{bmatrix}.
-\]
-Suppose that you want to classify the following test example:
-\[
-\hat{x} = \begin{bmatrix}1 & 1\end{bmatrix}.
-\]
-Suppose we fit a multi-class linear classifier using the softmax loss, and we obtain the following weight matrix:
-\[
-W = 
-\begin{bmatrix}
-+2 & +2 & +3\\
--1 & +2 & -1\\
-\end{bmatrix}
-\]
-\blu{
 \enum{
-\item Why are the weights of this model a $2 \times 3$ matrix?
-\item Under this model, what class label would we assign to the test example? (Show your work.)
-}}
-
-
-
-
+\item The data has 2 features and 3 possible labels, and in multi-class classification we need a set of weights for each possible label.
+\item $\hat{x} W =
+\begin{bmatrix}
+1 & 4 & 2
+\end{bmatrix}$. So we select the label that corresponds to the entry with the highest value, and in this case it is label 2.
+}
 
 \subsection{Softmax Loss}
 
-Using a one-vs-all classifier hurts performance because the classifiers are fit independently, so there is no attempt to calibrate the columns of the matrix $W$. An alternative to this independent model is to use the softmax loss probability,
-\[
-p(y_i | W, x_i) = \frac{\exp(w_{y_i}^Tx_i)}{\sum_{c=1}^k\exp(w_c^Tx_i)}.
-\]
-The loss function corresponding to the negative logarithm of the softmax probability for $n$ training examples is given by
-\[
-f(W) = \sum_{i=1}^n \left[-w_{y_i}^Tx_i + \log\left(\sum_{c' = 1}^k \exp(w_{c'}^Tx_i)\right)\right].
-\]
-\blu{Derive the partial derivative of this loss function with respect to a particular element $W_{jc}$}. Try to simplify the derivative as much as possible (but you can express the result in summation notation).
-
-Hint: for the gradient you can use $x_{ij}$ to refer to element $j$ of example $i$. For the first term you can use an `indicator' function, $I(y_i = c)$, which is $1$ when $y_i = c$ and is $0$ otherwise. Note that you can use the definition of the softmax probability to simplify the derivative.
-
+$$f_{W_{jc}}(W) = \sum_{i=1}^n \left[-I(y_i = c)x_{ij} + x_{ij}\exp(w_c^Tx_i)/\left(\sum_{c' = 1}^k \exp(w_{c'}^Tx_i)\right)\right]$$
+$$\to f_{W_{jc}}(W) = \sum_{i=1}^n \left[-I(y_i = c)x_{ij} + x_{ij}p(c|W,x_i)\right]$$
+$$\to f_{W_{jc}}(W) = \sum_{i=1}^n x_{ij}(p(c|W,x_i)-I(y_i = c))$$
 
 
 \subsection{Softmax Classifier}
 
-Make a new function, \emph{softmaxClassifier}, which fits $W$ using the softmax loss from the previous section  instead of fitting $k$ independent classifiers. \blu{Hand in the code and report the validation error}.
+Code:
+\begin{verbatim}
+function softmaxObj(w,X,y,k)
+    (n,d) = size(X)
+    W = reshape(w,d,k)
+    f = 0
+    g = zeros(d,k)
 
-Hint: you will want to use the \emph{derivativeCheck} option in \emph{findMin.jl} to check that your gradient code is correct. Also, note that \emph{findMin.jl} expects that the parameter vector and gradient are \emph{column vectors}. The easiest way to work around these issues is to use the \emph{reshape} command: call \emph{findMin.jl} with a $dk \times 1$ vector $w$ and at the start of your objective function reshape $w$ to be a $d \times k$ matrix $W$, then compute the $d \times k$ matrix of partial derivatives and finally reshape this to be a $dk \times 1$ vector.
+    partial = function(j,c)
+            total = 0
+            for i in 1:n
+                    term1 = y[i] == c ? 1 : 0
+                    term2 = exp(W[:,c]'*X[i,:]) / sum(exp.(X[i,:]'*W))
+                    total += X[i,j]*(term2-term1)
+            end
+            return total
+    end
 
+    for i in 1:n
+            f += -W[:,y[i]]'*X[i,:] + log(sum(exp.(X[i,:]'*W)))
+    end
+
+    for j in 1:d
+            for c in 1:k
+                    g[j,c] = partial(j,c)
+            end
+    end
+
+    return (f,reshape(g,d*k,1))
+end
+
+function softmaxClassifier(X,y)
+    (n,d) = size(X)
+    k = maximum(y)
+
+    W = zeros(d,k)
+    Wp = reshape(W,d*k,1)
+
+    funObj(w) = softmaxObj(w,X,y,k)
+
+    Wp = findMin(funObj,Wp,derivativeCheck=true,verbose=false)
+    W = reshape(Wp,d,k);
+    @show(W)
+
+    predict(Xhat) = mapslices(indmax,Xhat*W,2)
+
+    return LinearModel(predict,W)
+end
+\end{verbatim}
+
+Using softmax, the new train error is 0.004 and the validation error is 0.026.
 
 \subsection{Cost of Multinomial Logistic Regression}
 
@@ -116,10 +131,10 @@ Assuming that we have
 \item $t$ testing examples.
 \item $T$ iterations of gradient descent for training.
 }
-\blu{\enum{
-\item In $O()$ notation, what is the cost of training the softmax classifier?
-\item What is the cost of classifying the test examples?
-}}
+\enum{
+\item Computing the derivative of the objective function with respect to one entry in $W$ takes $n(d + dk)$ time. We need to take the derivatives with respect to all entries in $W$ to get the gradient, so computing the gradient takes $dk(nd + ndk)$ time. Using gradient descent we compute the gradient $T$ times so the total cost is $T(knd^2 + nk^2d^2)$, which is in $O(Tnk^2d^2)$
+\item To predict, we must compute $XW$, which takes $tdk$ time, and then we find the max of each training example, which takes $tk$, so the total is $tdk + tk$, which is in $O(tdk)$
+}
 
 
 
@@ -216,16 +231,14 @@ Note: you can compute the Frobenius norm of a matrix using the function \emph{ve
 
 
 \enum{
-\item What is the key advantage of stochastic gradient methods over gradient descent methods?
-\item Does stochastic gradient descent with a fixed step-size converge to the minimum of a convex function in general?
-\item What is the difference between multi-label and multi-class classification?
-\item What is the difference between MLE and MAP?
-\item Linear regression with one feature and PCA with 2 features (and $k=1$) both find a line in a two-dimensional space. Do they find the same line?
- Briefly justify your answer.
-\item Are the vectors minimizing the PCA objective unique? Briefly justify your answer
-\item Name two methods for promoting sparse solutions in a linear regression model that we discussed in class that result in convex problems.
-\item Can we always use the normal equations to solve non-negative least squares problems?
+\item Stochastic gradient methods use the gradient computed from one data point at each step instead of the gradient from all data points, so it's much faster when $n$ is large.
+\item No, the minimum exists in a 'ball', the radius of which is proportional to the step size, so ideally we would decrease the step size as we draw closer to the optimal region to ensure convergence.
+\item Multi-label: each data point may be assigned multiple labels. Mult-class: there are more than 2 labels.
+\item In MLE, we're maximizing the probability of $y$ given $X, w$, but in MAP, we're maximizing the probability of $w$, given $X, y$.
+\item No. Linear regression with one feature finds the line that has the minimal sum of the $y$ distances from the data points, whereas PCA with 2 features finds the line with the minimal sum of the perpendicular distances from teh data points.
+\item No, because there are usually multiple ways to write the same vector space. For example, $\begin{bmatrix}1 & 0\end{bmatrix}$, $\begin{bmatrix}0 & 1\end{bmatrix}$ form the same vector space as $\begin{bmatrix}2 & 0\end{bmatrix}$, $\begin{bmatrix}0 & 2\end{bmatrix}$
+\item 1) Linear regression with L1-regularization. 2) TODO
+\item Can we always use the normal equations to solve non-negative least squares problems? No? Because the minimizer computed from normal equations may be negative. TODO
 }
-We're looking for short and concise 1-sentence answers, not long and complicated answers. Also, there is roughly 1-2 questions per lecture.
 
 \end{document}
