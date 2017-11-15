@@ -238,7 +238,7 @@ Note: you can compute the Frobenius norm of a matrix using the function \emph{ve
 \item No. Linear regression with one feature finds the line that has the minimal sum of the $y$ distances from the data points, whereas PCA with 2 features finds the line with the minimal sum of the perpendicular distances from teh data points.
 \item No, because there are usually multiple ways to write the same vector space. For example, $\begin{bmatrix}1 & 0\end{bmatrix}$, $\begin{bmatrix}0 & 1\end{bmatrix}$ form the same vector space as $\begin{bmatrix}2 & 0\end{bmatrix}$, $\begin{bmatrix}0 & 2\end{bmatrix}$
 \item 1) Linear regression with L1-regularization. 2) TODO
-\item Can we always use the normal equations to solve non-negative least squares problems? No? Because the minimizer computed from normal equations may be negative. TODO
+\item No, because the minimizer computed from normal equations doesn't take the non-negative constraints into account and may be negative
 }
 
 \end{document}
