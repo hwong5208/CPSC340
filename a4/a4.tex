@@ -145,34 +145,6 @@ Assuming that we have
 
 \section{MAP Estimation}
 
-In class, we considered MAP estimation in a regression model where we assumed that:
-\items{
-\item The likelihood $p(y_i | x_i, w)$ is a normal distribution with a mean of $w^Tx_i$ and a variance of $1$.
-\item The prior for each variable $j$, $p(w_j)$, is a normal distribution with a mean of zero and a variance of $\lambda^{-1}$.
-}
-Under these assumptions, we showed computing the MAP estimate with $n$ training examples leads to the standard L2-regularized least squares objective function:
-\[
-f(w) = \frac{1}{2}\norm{Xw - y}^2 + \frac \lambda 2 \norm{w}^2.
-\]
-\blu{For each of the alternate assumptions below, write down the objective function that results} (from minimizing the negative log-posterior, and simplifying as much as possible):
-\enum{
-\item We use a Laplace likelihood with a mean of $w^Tx_i$ and a scale of $1$, and a normal prior with a variance of $\lambda^{-1}$ and a mean that is some ``guess'' $w^0$ of the optimal parameter vector,
-\[
-p(y_i | x_i, w) = \frac 1 2 \exp(-|w^Tx_i - y_i|), \quad p(w_j) \propto \exp\left(-\frac{\lambda(w_j -  w^0_j)^2}{2}\right)
-\]
-\item We use a normal  likelihood with a mean of $w^Tx_i$ but where each example $i$ has its own  positive variance $\sigma_i^2$, and we use a zero-mean Laplace prior for each variable with a scale parameter of $\lambda^{-1}$,
-\[
-p(y_i | x_i,w) = \frac{1}{\sqrt{2\sigma_i^2\pi}}\exp\left(-\frac{(w^Tx_i - y_i)^2}{2\sigma_i^2}\right), \quad p(w_j) = \frac{\lambda}{2}\exp(-\lambda|w_j|).
-\]
-The standard notation for this case is to use $\Sigma$ as a diagonal matrix with the $\sigma_i^2$ values along the diagonal.
-\item We use a Poisson likelihood with a mean of $\exp(w^Tx_i)$,\footnote{This is one way to use regression to model \emph{counts}, like ``number of Facebook likes''.} and a zero-mean normal prior with a variance of $\sigma^2$,
-\[
-p(y_i | x_i, w) = \frac{\exp(y_iw^Tx_i)\exp(-\exp(w^Tx_i))}{y_i!}, \quad p(w_j) = \frac{1}{\sqrt{2\sigma_i^2\pi}}\exp\left(-\frac{(w_j - 0)^2}{2\sigma_i^2}\right).
-\]
-For this sub-question you don't need to put likelihood in matrix notation.
-}
-
-
 \enum{
 \item $-\sum_{i=1}^n\log   \frac 1 2 \exp(-|w^Tx_i - y_i|)  -\sum_{j=1}^d\log \exp \frac{-\lambda(w_j -  w^0_j)^2}{2}$ \\
         $ =  \sum_{i=1}^n |w^Tx_i - y_i| +\sum_{j=1}^d  \frac{\lambda}{2}(w_j -  w^0_j)^2 + constant$\\
@@ -189,27 +161,6 @@ For this sub-question you don't need to put likelihood in matrix notation.
 
 \subsection{PCA by Hand}
 
-Consider the following dataset, containing 5 examples with 2 features each:
-\begin{center}
-\begin{tabular}{cc}
-$x_1$ & $x_2$\\
-\hline
--2 & -1\\
--1 & 0\\
-0 & 1\\
-1 & 2\\
-2 & 3\\
-\end{tabular}
-\end{center}
-Recall that with PCA we usually assume that the PCs are normalized ($\norm{w} = 1$), we need to center the data before we apply PCA, and that the direction of the first PC is the one that minimizes the orthogonal distance to all data points.
-\blu{
-\enum{
-\item What is the first principal component?
-\item What is the (L2-norm) reconstruction error of the point (3,3)? (Show your work.)
-\item What is the (L2-norm) reconstruction error of the point (3,4)? (Show your work.)
-}
-}
-
 \enum{
 \item $\mu$ is (0, 1), and the first principal component is $(\frac{1}{\sqrt2},\frac{1}{\sqrt2})$
 \item $ z = (3-0)/ \sqrt2 +(3-1)/ \sqrt2 = 5/\sqrt2$ \\
@@ -223,19 +174,8 @@ Recall that with PCA we usually assume that the PCs are normalized ($\norm{w} = 
 
 \subsection{Data Visualization}
 
-The script \emph{example\_PCA} will load a dataset containing 50 examples, and measuring 85 binary traits of these animals. It then standardizes these features and gives two unsatisfying visualizations of it. First it shows a plot of the matrix entries, which has too much information and thus gives little insight into the relationships between the animals. Next it shows a scatterplot based on two random features and displays the name of 10 randomly-chosen animals. Because of the binary features even a scatterplot matrix shows us almost nothing about the data.
-
-The function \emph{PCA}, which applies the classic PCA method (orthogonal bases via SVD) for a given $k$. Using this function, modify the demo so that the scatterplot uses the latent features $z_i$ from the PCA model. Make a scatterplot of the two columns in $Z$, and use the \emph{annotate} function to label a bunch of the points in the scatterplot.
-\blu{
-\enum{
-\item  Hand in your modified demo and the scatterplot.
-\item Which trait of the animals has the largest influence (absolute value) on the first principal component? (Make sure not to forget the ``+1'' when looking for the name of the trait in the \emph{dataTable}).
-\item Which trait of the animals has the largest influence (absolute value) on the second principal component?
-}
-}
-
 \begin{enumerate}
-\item  Code: 
+\item  Graph: See Figure \ref{fig:a3_2_1_a}\\Code: 
 \begin{verbatim}
 # Load data
 dataTable = readcsv("animals.csv")
@@ -291,22 +231,16 @@ end
 
 \begin{figure}[h!]
     \includegraphics[width=50em,height=8.5cm]{q3_2_1_a.png}
+    \caption{Question 3.2.1 Scatterplot using the first two features}
+    \label{fig:a3_2_1_a}
 \end{figure}
 \item Running \texttt{indmax(abs.(model.W[1,:]))}, we get 12, corresponding to furry
 \item Running \texttt{indmax(abs.(model.W[2,:]))}, we get 58, corresponding to grazer
 \end{enumerate}
 
 
+\vspace{10em}
 \subsection{Data Compression}
-
-It is important to know how much of the information in our dataset is captured by the low-dimensional PCA representation.
-In class we discussed the ``analysis" view that PCA maximizes the variance that is explained by the PCs, and the connection between the Frobenius norm and the variance of a centered data matrix $X$. Use this connection to answer the following:
-\blu{\enum{
-\item How much of the variance is explained by our two-dimensional representation from the previous question?
-\item How many\ PCs are required to explain 50\% of the variance in the data?
-\item How many\ PCs are required to explain 75\% of the variance in the data?
-}}
-Note: you can compute the Frobenius norm of a matrix using the function \emph{vecnorm}.
 
 \enum{
 \item 30.19\% 
