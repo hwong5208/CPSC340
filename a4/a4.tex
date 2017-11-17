@@ -174,13 +174,13 @@ For this sub-question you don't need to put likelihood in matrix notation.
 
 
 \enum{
-\item $-\sum_{i=1}^n\log   \frac 1 2 \exp(-|w^Tx_i - y_i|)  -\sum_{i=1}^n\log \exp \frac{-\lambda(w_j -  w^0_j)^2}{2}$ \\
-        $ =  \sum_{i=1}^n |w^Tx_i - y_i| +\sum_{i=1}^n  \frac{\lambda}{2}(w_j -  w^0_j)^2 + constant$\\
-       $= \norm{Xw-y}_1 +  \frac{\lambda}{2} \norm{w_j -  w^0_j}^2 + constant$
-\item  $-\sum_{i=1}^n\log  \frac{1}{\sqrt{2\sigma_i^2\pi}}\exp\left(-\frac{(w^Tx_i - y_i)^2}{2\sigma_i^2}\right) -\sum_{i=1}^n\log \frac{\lambda}{2}\exp(-\lambda|w_j|)  $\\
-       $  =\sum_{i=1}^n( \frac{(w^Tx_i - y_i)^2}{2\sigma_i^2}+ constant) +  \sum_{i=1}^n (\lambda|w_j| +constant) $\\
-       $ = \frac{1}{2}(Xw-y)^T \Sigma^{-1} (Xw-y) +\lambda|w|+ constant $
-\item  $-\sum_{i=1}^n\log  \frac{\exp(y_iw^Tx_i)\exp(-\exp(w^Tx_i))}{y_i!} -\sum_{i=1}^n \log  \frac{1}{\sqrt{2\sigma_i^2\pi}}\exp\left(-\frac{(w_j - 0)^2}{2\sigma_i^2}\right)$\\
+\item $-\sum_{i=1}^n\log   \frac 1 2 \exp(-|w^Tx_i - y_i|)  -\sum_{j=1}^d\log \exp \frac{-\lambda(w_j -  w^0_j)^2}{2}$ \\
+        $ =  \sum_{i=1}^n |w^Tx_i - y_i| +\sum_{j=1}^d  \frac{\lambda}{2}(w_j -  w^0_j)^2 + constant$\\
+       $= \norm{Xw-y}_1 +  \frac{\lambda}{2} \norm{w -  w^0}^2_2 + constant$
+\item  $-\sum_{i=1}^n\log  \frac{1}{\sqrt{2\sigma_i^2\pi}}\exp\left(-\frac{(w^Tx_i - y_i)^2}{2\sigma_i^2}\right) -\sum_{j=1}^d\log \frac{\lambda}{2}\exp(-\lambda|w_j|)  $\\
+       $  =\sum_{i=1}^n( \frac{(w^Tx_i - y_i)^2}{2\sigma_i^2}+ constant) +  \sum_{j=1}^d (\lambda|w_j| +constant) $\\
+       $ = \frac{1}{2}(Xw-y)^T \Sigma^{-1} (Xw-y) +\lambda\norm{w}_1+ constant $
+\item  $-\sum_{i=1}^n\log  \frac{\exp(y_iw^Tx_i)\exp(-\exp(w^Tx_i))}{y_i!} -\sum_{i=1}^n \log  \frac{1}{\sqrt{2\sigma^2\pi}}\exp\left(-\frac{(w_j - 0)^2}{2\sigma^2}\right)$\\
         $= -\sum_{i=1}^n (y_iw^Tx_i) + \sum_{i=1}^n \exp(w^Tx_i) +\frac{1}{2\sigma}\norm{w}^2+ constant$
 }
 
@@ -211,10 +211,10 @@ Recall that with PCA we usually assume that the PCs are normalized ($\norm{w} = 
 }
 
 \enum{
-\item The first principal component is $(\frac{1}{\sqrt2},\frac{1}{\sqrt2})$
+\item $\mu$ is (0, 1), and the first principal component is $(\frac{1}{\sqrt2},\frac{1}{\sqrt2})$
 \item $ z = (3-0)/ \sqrt2 +(3-1)/ \sqrt2 = 5/\sqrt2$ \\
         $ xhat = 5/\sqrt2 (\frac{1}{\sqrt2},\frac{1}{\sqrt2}) +(0,1) = (2.5,3.5)$\\
-       $ reconstruction error = \sqrt{ (2.5-3)^2+(3-3.5)^2} = \frac{1}{\sqrt2} $
+       $ reconstruction error = \sqrt{ (2.5-3)^2+(3.5-3)^2} = \frac{1}{\sqrt2} $
 \item $ z = (3-0)/ \sqrt2 +(4-1)/ \sqrt2 = 6/\sqrt2$ \\
         $ xhat = 6/\sqrt2 (\frac{1}{\sqrt2},\frac{1}{\sqrt2}) +(0,1) = (3,4)$\\
        $ reconstruction error = \sqrt{ (3-3)^2+(4-4)^2} = 0 $
@@ -292,8 +292,8 @@ end
 \begin{figure}[h!]
     \includegraphics[width=50em,height=8.5cm]{q3_2_1_a.png}
 \end{figure}
-\item furry
-\item grazer
+\item Running \texttt{indmax(abs.(model.W[1,:]))}, we get 12, corresponding to furry
+\item Running \texttt{indmax(abs.(model.W[2,:]))}, we get 58, corresponding to grazer
 \end{enumerate}
 
 
@@ -325,7 +325,7 @@ Note: you can compute the Frobenius norm of a matrix using the function \emph{ve
 \item In MLE, we're maximizing the probability of $y$ given $X, w$, but in MAP, we're maximizing the probability of $w$, given $X, y$.
 \item No. Linear regression with one feature finds the line that has the minimal sum of the $y$ distances from the data points, whereas PCA with 2 features finds the line with the minimal sum of the perpendicular distances from teh data points.
 \item No, because there are usually multiple ways to write the same vector space. For example, $\begin{bmatrix}1 & 0\end{bmatrix}$, $\begin{bmatrix}0 & 1\end{bmatrix}$ form the same vector space as $\begin{bmatrix}2 & 0\end{bmatrix}$, $\begin{bmatrix}0 & 2\end{bmatrix}$
-\item 1) Linear regression with L1-regularization. 2) TODO
+\item 1) Linear regression with L1-regularization. 2) Non-negative least squares
 \item No, because the minimizer computed from normal equations doesn't take the non-negative constraints into account and may be negative
 }
 
