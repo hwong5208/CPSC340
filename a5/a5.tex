@@ -140,19 +140,15 @@ Hint: there are many possible strategies you could take to improve performance. 
 \section{Very-Short Answer Questions}
 
 
-\blu{
 \enum{
-\item Is the NMF loss function convex? What is an optimization method you could use to try to minimize it?
-\item Why is it difficult for a standard collaborative filtering model  to make good predictions for new  items?
-\item If a dataset in 3-dimensions is confined to a plane, is an algorithm MDS with $k=2$ guaranteed to find a representation with an error of zero? What about PCA?
-\item What is the difference between Euclidean distance and geodesic distance?
-\item Why is a sigmoid used as a "squashing" function in neural networks?
-\item Assuming we could find globally minimize the neural network objectve, how does the depth of a neural network affect the fundamental trade-off?
-\item List 3 forms of regularization we use to prevent overfitting in neural networks.
-\item  Assuming we could find globally minimize the neural network objectve, how would the width of the convolutions in a convolutational neural network affect the fundamental trade-off?
+\item NMF is non-convex and can be minimized using projected gradient, where we run gradient descent on the loss function but set any negative values we get from gradient descent to zero.
+\item A standard collaborative filtering model is trained, unsupervised, to minimize categorizing/clustering errors and is never trained to optimize the weights for prediction with supervised learning.
+\item No. Both MDS and PCA can be viewed as some sort of compression algorithms, so there is always data loss, unless the data points in 3D all lie on the same 2D plane, but that's not guaranteed.
+\item Euclidean distance is the length of the straight line drawn between two points, whereas geodesic distance is the length of the curve drawn between two points on a manifold. (i.e. Euclidean $\leq$ geodesic)
+\item It results in a smooth loss that can be optimized with gradient descent and ensures the output of the perceptron is between 0 and 1 regardless of the domain of the input, so it can be used to represent probabilities
+\item A deeper neural network likely has a higher test error but lower train error, while a neural network less deep likely has a high train error but lower test error.
+\item 1) adding L2-regularizers for each layer of $W$ and optimizing the $\lambda$ of each regularizer, 2) early stopping (stops optimzation if validation error starts increasing), 3) dropout (setting some $x_i$ and $z_i$ in each layer to 0)
+\item  Larger width results in smaller train error but larger test error, whereas smaller width results in larger train error but smaller test error.
 }
-}
-
-We're looking for short and concise 1-sentence answers, not long and complicated answers. Also, there is roughly 1-2 questions per lecture.
 
 \end{document}
