@@ -6,7 +6,8 @@ X = load("highway.jld","X")
 # Fit PCA model
 include("PCA.jl")
 k = 5
-model = PCA(X,k)
+#model = PCA_gradient(X,k)
+model = robustPCA(X,k)
 
 Z = model.compress(X)
 Xhat = model.expand(Z)
@@ -18,7 +19,7 @@ for i in 1:nFrames
 	original = reshape(X[i,:],64,64)
 	reconstr = reshape(Xhat[i,:],64,64)
 	diff = 255*(abs.(original-reconstr) .> 10)
-	figure(1)
+  	figure(1)
 	clf()
 	imshow([original reconstr diff],cmap="gray")
 	sleep(pause)

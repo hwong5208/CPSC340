@@ -74,6 +74,97 @@ Hint: most of the work has been done for you in the function \emph{PCA\_gradient
 \]
 where $\epsilon$ controls the accuracy of the approximation (a typical value of $\epsilon$ is $0.0001$).
 
+Code:
+\begin{verbatim}
+function robustPCA(X,k)
+    (n,d) = size(X)
+
+    # Subtract mean
+    mu = mean(X,1)
+    X -= repmat(mu,n,1)
+
+    # Initialize W and Z
+    W = randn(k,d)
+    Z = randn(n,k)
+
+    R = Z*W - X
+    epsilon=0.0001
+    f= sum(sum(sqrt.(R.^2+epsilon)))
+    funObjZ(z) = rpcaObjZ(z,X,W)
+    funObjW(w) = rpcaObjW(w,X,Z)
+    for iter in 1:50
+        fOld = f
+
+        # Update Z
+        Z[:] = findMin(funObjZ,Z[:],verbose=false,maxIter=10)
+
+        # Update W
+        W[:] = findMin(funObjW,W[:],verbose=false,maxIter=10)
+
+        R = Z*W - X
+        f = sum(sum(sqrt.(R.^2+epsilon)))
+        @printf("Iteration %d, loss = %f\n",iter,f/length(X))
+
+        if (fOld - f)/length(X) < 1e-2
+            break
+        end
+    end
+
+
+    # We didn't enforce that W was orthogonal so we need to optimize to find Z
+    compress(Xhat) = compress_gradientDescent(Xhat,W,mu)
+    expand(Z) = expandFunc(Z,W,mu)
+
+    return CompressModel(compress,expand,W)
+end
+
+function rpcaObjZ(z,X,W)
+    # Rezie vector of parameters into matrix
+    n = size(X,1)
+    k = size(W,1)
+    Z = reshape(z,n,k)
+
+    # Comptue function value
+    R = Z*W - X
+        epsilon=0.0001
+    A = (sqrt.(R.^2+epsilon))
+
+    # Comptue derivative with respect to each residual
+    dR = R./A
+
+    # Multiply by W' to get elements of gradient
+    G = dR*W'
+
+     f = sum(sum(sqrt.(R.^2+epsilon)))
+    # Return function and gradient vector
+    return (f,G[:])
+end
+
+function rpcaObjW(w,X,Z)
+    # Rezie vector of parameters into matrix
+    d = size(X,2)
+    k = size(Z,2)
+    W = reshape(w,k,d)
+
+    # Comptue function value
+    R = Z*W - X
+        epsilon=0.0001
+    A = (sqrt.(R.^2+epsilon))
+
+    # Comptue derivative with respect to each residual
+    dR = R ./A
+
+    # Multiply by Z' to get elements of gradient
+    G = Z'dR
+
+
+     f = sum(sum(sqrt.(R.^2+epsilon)))
+    # Return function and gradient vector
+    return (f,G[:])
+end
+
+\end{verbatim}
+
 \subsection{L1-Regularized and Binary Latent-Factor Models}
 
 We have a matrix $X$, where we have observed a subset of its individual elements. Let $\mathcal{R}$ be the set of indices $(i,j)$ where we have observed the element $x_{ij}$. We want to build a model that predicts the missing entries, so we use a latent-factor model with an L1-regularizer on the coefficients $W$ and a separate L2-regularizer on the coefficients $Z$,
@@ -92,6 +183,16 @@ where the regularization parameters satisfy $\lambda_W > 0$ and $\lambda_Z > 0$.
 \item Suppose each element of the matrix $X$ is either $+1$ or $-1$ and our goal is to build a model that makes the sign of $w_j^Tz_i$ match the sign of $x_{ij}$. Write down a (continuous) objective function that would be more suitable.
 }}
 
+\enum{
+\item As $\lambda_W$ increases, W will be more sparse. And, Z will not affect by $\lambda_W$.
+\item $\lambda_Z$ would not affect Z , because we are using L2-norm.
+\item when $\lambda_Z$ increase,  the bias tend to more zero. The traning error will go up ,and it will become a better aproximation of test error.
+\item when K increase, the model be more complicated. The trainf error wil go down, and it will become a worse approximation of test error.
+\item when $\lambda_W$ = 0, there is no constraint on W. It also could cancel the constraint of $\lambda_Z$ by changing W. Therefore, $\lambda_Z$ would not affect the fundamental trade-off. For K, it would be the stay. When K increase, the model will become complicated.
+\item \[
+f(Z,W) = \sum_{(i,j) \in \mathcal{R}}\left[log(1 + exp(-x_{ij} w_j^Tz_i )) \right] + \lambda_W \sum_{j=1}^d \left[\norm{w_j}_1\right] + \frac{\lambda_Z}{2} \sum_{i=1}^n \left[\norm{z_i}^2\right],
+\]
+}
 
 
 
@@ -114,10 +215,123 @@ Euclidean distances between very different animals are unlikely to be particular
 Hint: the function \emph{dijskstra} (in \emph{misc.jl}) can be used to compute the shortest (weighted) distance between two points in a weighted graph. This function requires an $n$ by $n$ matrix giving the weights on each edge (use $\infty$ as the weight for absent edges). Note that ISOMAP uses an undirected graph, while the $k$-nearest neighbour graph might be asymmetric. You can use the usual heuristics to turn this into an undirected graph of including an edge $i$ to $j$ if $i$ is a KNN of $j$ or if $j$ is a KNN of $i$. (Also, be careful not to include the point itself in the KNN list).
 
 
+\begin{figure}[h!]
+    \includegraphics[width=50em,height=8.5cm]{q2_1.png}
+    \caption{Question 2.1 ISOMAP}
+    \label{fig:q2_1}
+\end{figure}
+
+Code:
+\begin{verbatim}
+
+function ISOMAP(X)
+    k =3
+    (n,d) = size(X)
+
+    # Compute all distances
+    D = distancesSquared(X,X)
+    D = sqrt.(abs.(D))
+
+    E = ones(n,n).*Inf
+
+    for i in 1:n
+        A = sortperm(D[i,:])
+        for j in 2:k+1
+          
+          E[i,A[j]] =D[i,A[j]]
+          E[A[j],i] =D[A[j],i]     
+        end 
+    end
+
+    D = zeros(n,n)
+    for i in 1:n
+        for j in 1:n
+         D[i,j] = dijkstra(E,i,j)
+        end
+    end
+
+    # Initialize low-dimensional representation with PCA
+    model = PCA(X,2)
+    Z = model.compress(X)
+    
+
+    funObj(z) = stress(z,D)
+
+    Z[:] = findMin(funObj,Z[:])
+
+    return Z
+end
+
+\end{verbatim}
+
+
+
 \subsection{ISOMAP with Disconnected Graph}
 
 An issue with measuring distances on graphs is that the graph may not be connected. For example, if you run your ISOMAP code with $2$-nearest neighbours then some of the distances are infinite. One heuristic to address this is to set these infinite distances to the maximum distance in the graph (i.e., the maximum geodesic distance between any two points that are connected), which will encourage non-connected points to be far apart. Modify your ISOMAP function to implement this heuristic. \blu{Hand in your code and the plot of the result when using the $2$-nearest neighbours}.
 
+\begin{figure}[h!]
+    \includegraphics[width=50em,height=8.5cm]{q2_2.png}
+    \caption{Question 2.2 ISOMAP with Disconnected Graph}
+    \label{fig:q2_2}
+\end{figure}
+
+Code:
+\begin{verbatim}
+
+function ISOMAPdisconnectedGraph(X)
+    k =2
+    (n,d) = size(X)
+
+    # Compute all distances
+    D = distancesSquared(X,X)
+    D = sqrt.(abs.(D))
+
+    E = ones(n,n).*Inf
+
+    for i in 1:n
+        A = sortperm(D[i,:])
+        for j in 2:k+1
+          
+          E[i,A[j]] =D[i,A[j]]
+          E[A[j],i] =D[A[j],i]     
+        end 
+    end
+
+    D = zeros(n,n)
+    max = -Inf
+    for i in 1:n
+        for j in 1:n
+         D[i,j] = dijkstra(E,i,j)
+         if(D[i,j]!=Inf && D[i,j] > max)
+            max =  D[i,j]
+         end
+        end
+    end
+
+
+    for i in 1:n
+        for j in 1:n
+             if(D[i,j]==Inf )
+             D[i,j] = max
+         end
+        end
+    end
+
+
+    # Initialize low-dimensional representation with PCA
+    model = PCA(X,2)
+    Z = model.compress(X)
+    
+
+    funObj(z) = stress(z,D)
+
+    Z[:] = findMin(funObj,Z[:])
+
+    return Z
+end
+
+\end{verbatim}
 
 
 \section{Neural Networks}
