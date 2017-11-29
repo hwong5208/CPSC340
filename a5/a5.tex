@@ -336,20 +336,32 @@ end
 
 \section{Neural Networks}
 
-
-The file \texttt{example\_nnet.jl} runs a stochastic gradient method to train a neural network on the \emph{basisData} dataset from a previous assignment. However, in its current form it doesn't fit the data very well. Modify the training procedure to improve the performance of the neural network. \blu{Hand in your plot after changing the code to have better performance, and list the changes you made}.
-
-Hint: there are many possible strategies you could take to improve performance. Below are some suggestions, but note that the some will be more effective than others:
+Various changes were made using combinations of the following items:
 \items{
-\item Changing the network structure (\emph{nHidden} is a vector giving the number of hidden units in each layer).
-\item Changing the training procedure (you can change the stochastic gradient step-size, use mini-batches, run it for more iterations, add momentum, switch to \emph{findMin}, and so on).
-\item Transform the data by standardizing the feautres, standardizing the targets, and so on.
-\item Add regularization (L2-regularization, L1-regularization, dropout, and so on).
-\item Add bias variables within the hidden layers.
-\item Change the loss function or the non-linearities (right now it uses squared error and $\tanh$ to introduce non-linearity).
+\item increasing $nHidden$ up to 150
+\item increasing and decreasing the stochastic gradient step-size
+\item increasing the number of stochastic iterations
+\item adding momentum
+\item adding L2 regularizer with various values for $\lambda$
+\item using different activation functions, such as sigmoid, quadratic, $tanh + tanh^2$, composite of $tanh$ and quadratic
 }
 
+(standardization wasn't tried because the data we are graphing is 2D - i.e. we're only fitting 1 feature)
 
+In the end, the best fit we found had the following parameters and added steps:
+\items{
+    \item $nHidden = 100$: deep neural network
+    \item L2 regularizer with $\lambda = 0.01$: to reduce overfitting since we have so many layers
+    \item momentum: to improve optimization using stochastic gradient
+    \item dynamic step size, going from $1e-4$ to $1e-7$: deep networks are sensitive to step-size, so the idea was to improve the performance of stochastic gradient by decreasing the step-size. We used decreasing step-sizes instead of using a constant small step-size to reduce runtime and the number of iterations required
+    \item 50000 iterations: stochastic gradient with smaller step-sizes requires more iterations to reach optimal region
+}
+
+\begin{figure}[h!]
+    \includegraphics[width=28em]{a5_q3.png}
+    \caption{Improved Neural Network Result}
+    \label{fig:q3}
+\end{figure}
 
 \section{Very-Short Answer Questions}
 

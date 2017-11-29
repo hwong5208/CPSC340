@@ -36,7 +36,6 @@ function NeuralNet_backprop(bigW,x,y,nHidden)
 	#### Define activation function and its derivative
 	h(z) = tanh.(z)
 	dh(z) = (sech.(z)).^2
-
 	
 	#### Forward propagation
 	z = Array{Any}(nLayers)
@@ -85,6 +84,10 @@ function NeuralNet_backprop(bigW,x,y,nHidden)
 		ind += nHidden[layer]*nHidden[layer-1]
 	end
 	g[ind+1:end] = Gout
+
+        # regularization
+        lambda = 0
+        g += lambda .* bigW
 
 	return (f,g)
 end
