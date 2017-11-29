@@ -136,7 +136,7 @@ function robustPCA(X,k)
 
     R = Z*W - X
     epsilon=0.0001
-    f= sum(sum(sqrt.(R.^2+epsilon)))
+    f= sum(sqrt.(R.^2+epsilon))
     funObjZ(z) = rpcaObjZ(z,X,W)
     funObjW(w) = rpcaObjW(w,X,Z)
     for iter in 1:50
@@ -182,7 +182,7 @@ function rpcaObjZ(z,X,W)
     # Multiply by W' to get elements of gradient
     G = dR*W'
 
-     f = sum(sum(sqrt.(R.^2+epsilon)))
+     f = sum(sqrt.(R.^2+epsilon))
     # Return function and gradient vector
     return (f,G[:])
 end
@@ -205,7 +205,7 @@ function rpcaObjW(w,X,Z)
     G = Z'dR
 
 
-     f = sum(sum(sqrt.(R.^2+epsilon)))
+     f = sum(sqrt.(R.^2+epsilon))
     # Return function and gradient vector
     return (f,G[:])
 end

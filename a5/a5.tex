@@ -87,7 +87,7 @@ function robustPCA(X,k)
         W[:] = findMin(funObjW,W[:],verbose=false,maxIter=10)
 
         R = Z*W - X
-        f = sum(sum(sqrt.(R.^2+epsilon)))
+        f = sum(sqrt.(R.^2+epsilon))
         @printf("Iteration %d, loss = %f\n",iter,f/length(X))
 
         if (fOld - f)/length(X) < 1e-2
@@ -143,7 +143,7 @@ function rpcaObjW(w,X,Z)
     G = Z'dR
 
 
-     f = sum(sum(sqrt.(R.^2+epsilon)))
+     f = sum(sqrt.(R.^2+epsilon))
     # Return function and gradient vector
     return (f,G[:])
 end
