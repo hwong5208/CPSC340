@@ -41,38 +41,23 @@
 
 \begin{document}
 
-\title{CPSC 340 Assignment t (due November 27 ATE)}
+\title{CPSC 340 Assignment 5 (due November 27 ATE)}
 \author{}
 \date{}
 \maketitle
 \vspace{-4em}
 
+Name: Hang Yee Wong\\
+CS ID: r9i0b
 
+Name: Joanne Chen\\
+CS ID: r0a9
 
 \section{PCA Generalizations}
 
 
 \subsection{Robust PCA}
 
-The function \emph{example\_RPCA} loads a dataset $X$ where each row contains the pixels from a single frame of a video of a highway. The demo applies PCA to this dataset and then uses this to reconstruct the original image. It then shows the following 3 images for each frame of the first 50 frames (pausing for a tenth of a second on each frame):\footnote{If any of you are still having trouble with PyPlot on Windows, I found these instructions worked on multiple computers: \url{https://stackoverflow.com/questions/46399480/julia-runtime-error-when-using-pyplot}}
-\enum{
-\item The original frame.
-\item The reconstruction based on PCA.
-\item A binary image showing locations where the reconstruction error is non-trivial.
-}
-Recently, latent-factor models have been proposed as a strategy for ``background subtraction'': trying to separate objects from their background. In this case, the background is the highway and the objects are the cars on the highway. In this demo, we see that PCA does an ok job of identifying the cars on the highway in that it does tend to identify the locations of cars. However, the results aren't great as it identifies quite a few irrelevant parts of the image as objects.
-
-Robust PCA is a variation on PCA where we replace the L2-norm with the L1-norm,
-\[
-f(Z,W) = \sum_{i=1}^n\sum_{j=1}^d |w_j^Tz_i - x_{ij}|,
-\]
-and it has recently been proposed as a more effective model for background subtraction. \blu{Write a new function, \emph{robustPCA}, that uses a smooth approximation to the absolute value to implement robust PCA. Hand in your code.}
-
-Hint: most of the work has been done for you in the function \emph{PCA\_gradient}. This function  implements an alternating minimization approach to minimizing the PCA objective (without enforcing orthogonality). This gradient-based approach to PCA can be modified to use a smooth approximation of the L1-norm. Note that the log-sum-exp approximation to the absolute value may be hard to get working due to numerical issues, and a numerically-nicer approach is to use the ``multi-quadric'' approximation:
-\[
-|\alpha| \approx \sqrt{\alpha^2 + \epsilon},
-\]
-where $\epsilon$ controls the accuracy of the approximation (a typical value of $\epsilon$ is $0.0001$).
 
 Code:
 \begin{verbatim}
@@ -167,22 +152,6 @@ end
 
 \subsection{L1-Regularized and Binary Latent-Factor Models}
 
-We have a matrix $X$, where we have observed a subset of its individual elements. Let $\mathcal{R}$ be the set of indices $(i,j)$ where we have observed the element $x_{ij}$. We want to build a model that predicts the missing entries, so we use a latent-factor model with an L1-regularizer on the coefficients $W$ and a separate L2-regularizer on the coefficients $Z$,
-\[
-f(Z,W) = \frac{1}{2}\sum_{(i,j) \in \mathcal{R}}\left[(w_j^Tz_i - x_{ij})^2 \right] + \lambda_W \sum_{j=1}^d \left[\norm{w_j}_1\right] + \frac{\lambda_Z}{2} \sum_{i=1}^n \left[\norm{z_i}^2\right],
-\]
-where the regularization parameters satisfy $\lambda_W > 0$ and $\lambda_Z > 0$.
-
-\blu{
-\enum{
-\item What is the effect of $\lambda_W$ on the sparsity of the parameters $W$ and $Z$? 
-\item What is the effect of $\lambda_Z$ on the sparsity of $W$ and $Z$?
-\item What is the effect of $\lambda_Z$ on the two parts of the fundamental trade-off in machine learning? 
-\item What is the effect of $k$ on the two parts?
-\item Would either of answers to the \emph{previous two questions} change if $\lambda_W = 0$?
-\item Suppose each element of the matrix $X$ is either $+1$ or $-1$ and our goal is to build a model that makes the sign of $w_j^Tz_i$ match the sign of $x_{ij}$. Write down a (continuous) objective function that would be more suitable.
-}}
-
 \enum{
 \item As $\lambda_W$ increases, W will be more sparse. And, Z will not affect by $\lambda_W$.
 \item $\lambda_Z$ would not affect Z , because we are using L2-norm.
@@ -198,22 +167,7 @@ f(Z,W) = \sum_{(i,j) \in \mathcal{R}}\left[log(1 + exp(-x_{ij} w_j^Tz_i )) \righ
 
 \section{Multi-Dimensional Scaling}
 
-The function \emph{example\_MDS} loads the animals dataset and then applies gradient dsecent to minimize the following multi-dimensional scaling (MDS) objective (starting from the PCA solution):
-\begin{equation}
-\label{eq:MDS}
-f(Z) =  \frac{1}{2}\sum_{i=1}^n\sum_{j=i+1}^n (  \norm{z_i - z_j} - \norm{x_i - x_j})^2.
-\end{equation}
- The result of applying MDS is shown below.
-%\centerfig{.5}{animals.png}
-Although this visualization isn't perfect (with ``gorilla'' being placed close to the dogs and ``otter'' being placed close to two types of bears), this visualization does organize the animals in a mostly-logical way.
-
-
 \subsection{ISOMAP}
-
-Euclidean distances between very different animals are unlikely to be particularly meaningful. However, since related animals tend to share similar traits we might expect the animals to live on a low-dimensional manifold. This suggests that ISOMAP may give a better visualization. Make a new function \emph{ISOMAP} that computes the approximate geodesic distance (shortest path through a graph where the edges are only between nodes that are $k$-nearest neighbour) between each pair of points, and then fits a standard MDS model~\eqref{eq:MDS} using gradient descent. \blu{Hand in your code and the plot of the result when using the $3$-nearest neighbours}.
-
-Hint: the function \emph{dijskstra} (in \emph{misc.jl}) can be used to compute the shortest (weighted) distance between two points in a weighted graph. This function requires an $n$ by $n$ matrix giving the weights on each edge (use $\infty$ as the weight for absent edges). Note that ISOMAP uses an undirected graph, while the $k$-nearest neighbour graph might be asymmetric. You can use the usual heuristics to turn this into an undirected graph of including an edge $i$ to $j$ if $i$ is a KNN of $j$ or if $j$ is a KNN of $i$. (Also, be careful not to include the point itself in the KNN list).
-
 
 \begin{figure}[h!]
     \includegraphics[width=50em,height=8.5cm]{q2_1.png}
@@ -267,8 +221,6 @@ end
 
 
 \subsection{ISOMAP with Disconnected Graph}
-
-An issue with measuring distances on graphs is that the graph may not be connected. For example, if you run your ISOMAP code with $2$-nearest neighbours then some of the distances are infinite. One heuristic to address this is to set these infinite distances to the maximum distance in the graph (i.e., the maximum geodesic distance between any two points that are connected), which will encourage non-connected points to be far apart. Modify your ISOMAP function to implement this heuristic. \blu{Hand in your code and the plot of the result when using the $2$-nearest neighbours}.
 
 \begin{figure}[h!]
     \includegraphics[width=50em,height=8.5cm]{q2_2.png}
@@ -333,7 +285,6 @@ end
 
 \end{verbatim}
 
-
 \section{Neural Networks}
 
 Various changes were made using combinations of the following items:
@@ -358,8 +309,8 @@ In the end, the best fit we found had the following parameters and added steps:
 }
 
 \begin{figure}[h!]
-    \includegraphics[width=28em]{a5_q3.png}
-    \caption{Improved Neural Network Result}
+    \includegraphics[width=33em]{a5_q3.png}
+    \caption{Q5 Improved Neural Network Result}
     \label{fig:q3}
 \end{figure}
 
